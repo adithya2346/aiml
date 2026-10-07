@@ -1,0 +1,4 @@
+node_modules/
+db/freshers.db
+.env
+*.log

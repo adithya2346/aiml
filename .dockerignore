@@ -1,0 +1,7 @@
+node_modules
+db/freshers.db
+db/freshers.db-wal
+db/freshers.db-shm
+.env
+.git
+*.log

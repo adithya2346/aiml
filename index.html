@@ -1,0 +1,2547 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>Freshers 2026: Level 1 Unlocked | Official Invitation</title>
+  <meta name="description" content="Official Freshers' Party Invitation for Juniors. Hosted by Seniors. Unlock your pass now!">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+  
+  <!-- Canvas Confetti & html2canvas for Pass Download -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/canvas-confetti/1.9.2/confetti.browser.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <style>
+    /* ==========================================================================
+       CSS CUSTOM PROPERTIES & THEME CONFIGURATION
+       ========================================================================== */
+    :root {
+      /* Dark Theme (Default) */
+      --bg-primary: #0a0b12;
+      --bg-secondary: #121324;
+      --bg-card: rgba(23, 25, 48, 0.75);
+      --bg-card-border: rgba(168, 85, 247, 0.3);
+      --bg-card-solid: #16182e;
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      
+      --neon-cyan: #06b6d4;
+      --neon-cyan-glow: rgba(6, 182, 212, 0.45);
+      --neon-purple: #a855f7;
+      --neon-purple-glow: rgba(168, 85, 247, 0.45);
+      --neon-pink: #ec4899;
+      --neon-pink-glow: rgba(236, 72, 153, 0.45);
+      --neon-yellow: #eab308;
+      --neon-green: #10b981;
+
+      --accent-gradient: linear-gradient(135deg, #06b6d4 0%, #a855f7 50%, #ec4899 100%);
+      --ticket-bg: linear-gradient(145deg, #131427 0%, #1e1b4b 60%, #17112d 100%);
+      --glass-blur: blur(14px);
+      --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+      --shadow-lg: 0 10px 25px -3px rgba(0, 0, 0, 0.5), 0 0 20px rgba(168, 85, 247, 0.2);
+
+      --font-body: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-heading: 'Space Grotesk', sans-serif;
+      --font-arcade: 'Press Start 2P', monospace;
+
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --radius-full: 9999px;
+    }
+
+    /* Light Theme */
+    [data-theme="light"] {
+      --bg-primary: #f8faff;
+      --bg-secondary: #edf2f9;
+      --bg-card: rgba(255, 255, 255, 0.85);
+      --bg-card-border: rgba(168, 85, 247, 0.25);
+      --bg-card-solid: #ffffff;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+
+      --neon-cyan: #0891b2;
+      --neon-cyan-glow: rgba(8, 145, 178, 0.25);
+      --neon-purple: #9333ea;
+      --neon-purple-glow: rgba(147, 51, 234, 0.25);
+      --neon-pink: #db2777;
+      --neon-pink-glow: rgba(219, 39, 119, 0.25);
+
+      --ticket-bg: linear-gradient(145deg, #ffffff 0%, #f1f5f9 60%, #e0e7ff 100%);
+      --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
+      --shadow-lg: 0 10px 25px -3px rgba(147, 51, 234, 0.15), 0 0 20px rgba(8, 145, 178, 0.1);
+    }
+
+    /* Reset & Base */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      font-size: 16px;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+      transition: background-color 0.3s ease, color 0.3s ease;
+      position: relative;
+    }
+
+    /* Retro Grid Background Pattern */
+    .retro-grid-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.18;
+      background-size: 40px 40px;
+      background-image: 
+        linear-gradient(to right, rgba(168, 85, 247, 0.25) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(6, 182, 212, 0.25) 1px, transparent 1px);
+    }
+
+    /* Ambient Glow Orbs */
+    .ambient-glow {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(120px);
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.25;
+    }
+    .ambient-glow-1 {
+      top: -100px;
+      left: -100px;
+      width: 350px;
+      height: 350px;
+      background: var(--neon-purple);
+    }
+    .ambient-glow-2 {
+      bottom: -100px;
+      right: -100px;
+      width: 400px;
+      height: 400px;
+      background: var(--neon-cyan);
+    }
+
+    /* Container Utility */
+    .container {
+      width: 100%;
+      max-width: 680px; /* Mobile first, comfortable on tablet/desktop */
+      margin: 0 auto;
+      padding: 0 1.25rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Typography */
+    h1, h2, h3, h4 {
+      font-family: var(--font-heading);
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .pixel-tag {
+      font-family: var(--font-arcade);
+      font-size: 0.65rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 0.35rem 0.65rem;
+      border-radius: var(--radius-sm);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: rgba(168, 85, 247, 0.15);
+      border: 1px solid var(--neon-purple);
+      color: var(--neon-cyan);
+      box-shadow: 0 0 10px var(--neon-purple-glow);
+    }
+
+    .section-title {
+      font-size: 1.65rem;
+      text-align: center;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .section-subtitle {
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      margin-bottom: 1.8rem;
+    }
+
+    .gradient-text {
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: inline-block;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      font-family: var(--font-heading);
+      font-size: 0.95rem;
+      font-weight: 700;
+      padding: 0.85rem 1.4rem;
+      border-radius: var(--radius-md);
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      min-height: 48px; /* Touch target */
+    }
+
+    .btn:active {
+      transform: scale(0.97);
+    }
+
+    .btn-primary {
+      background: var(--accent-gradient);
+      color: #ffffff;
+      box-shadow: 0 4px 15px var(--neon-purple-glow);
+    }
+    .btn-primary:hover {
+      box-shadow: 0 6px 20px var(--neon-pink-glow);
+      transform: translateY(-2px);
+    }
+
+    .btn-outline {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-primary);
+      border: 1px solid var(--bg-card-border);
+      backdrop-filter: var(--glass-blur);
+    }
+    .btn-outline:hover {
+      border-color: var(--neon-cyan);
+      color: var(--neon-cyan);
+    }
+
+    .btn-cyan {
+      background: linear-gradient(135deg, var(--neon-cyan), #0284c7);
+      color: #ffffff;
+      box-shadow: 0 4px 15px var(--neon-cyan-glow);
+    }
+
+    .btn-sm {
+      padding: 0.4rem 0.8rem;
+      font-size: 0.8rem;
+      min-height: 36px;
+      border-radius: var(--radius-sm);
+    }
+
+    /* Card Styling */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--bg-card-border);
+      backdrop-filter: var(--glass-blur);
+      border-radius: var(--radius-lg);
+      padding: 1.4rem;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 1.25rem;
+      transition: border-color 0.2s ease, transform 0.2s ease;
+    }
+
+    /* ==========================================================================
+       LOGIN VIEW STYLES
+       ========================================================================== */
+    #login-view {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 1.5rem 1rem;
+      position: relative;
+      z-index: 10;
+    }
+
+    .login-box {
+      width: 100%;
+      max-width: 440px;
+      background: var(--bg-card);
+      border: 1px solid var(--bg-card-border);
+      backdrop-filter: var(--glass-blur);
+      border-radius: var(--radius-lg);
+      padding: 2.2rem 1.6rem;
+      box-shadow: var(--shadow-lg);
+      text-align: center;
+      animation: floatIn 0.5s ease-out forwards;
+    }
+
+    @keyframes floatIn {
+      from { opacity: 0; transform: translateY(20px) scale(0.96); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .arcade-coin-slot {
+      width: 68px;
+      height: 68px;
+      margin: 0 auto 1.2rem;
+      border-radius: 50%;
+      background: rgba(168, 85, 247, 0.15);
+      border: 2px dashed var(--neon-cyan);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      box-shadow: 0 0 15px var(--neon-cyan-glow);
+      animation: pulseGlow 2.5s infinite alternate;
+    }
+
+    @keyframes pulseGlow {
+      from { box-shadow: 0 0 10px var(--neon-cyan-glow); transform: scale(1); }
+      to { box-shadow: 0 0 25px var(--neon-purple-glow); transform: scale(1.05); }
+    }
+
+    .login-title {
+      font-size: 1.5rem;
+      margin-bottom: 0.3rem;
+    }
+
+    .login-desc {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .input-group {
+      margin-bottom: 1.2rem;
+      text-align: left;
+    }
+
+    .input-label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-secondary);
+      margin-bottom: 0.4rem;
+    }
+
+    .usn-input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .usn-input {
+      width: 100%;
+      padding: 0.9rem 1rem 0.9rem 2.8rem;
+      font-family: var(--font-heading);
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      border-radius: var(--radius-md);
+      background: rgba(0, 0, 0, 0.25);
+      border: 1.5px solid var(--bg-card-border);
+      color: var(--text-primary);
+      text-transform: uppercase;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    [data-theme="light"] .usn-input {
+      background: rgba(255, 255, 255, 0.9);
+    }
+
+    .usn-input:focus {
+      border-color: var(--neon-cyan);
+      box-shadow: 0 0 15px var(--neon-cyan-glow);
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 1rem;
+      color: var(--neon-cyan);
+      font-size: 1.1rem;
+      pointer-events: none;
+    }
+
+    .login-helper {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 0.4rem;
+    }
+
+    .error-msg {
+      display: none;
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.5);
+      color: #f87171;
+      font-size: 0.85rem;
+      padding: 0.75rem 1rem;
+      border-radius: var(--radius-sm);
+      margin-bottom: 1.2rem;
+      text-align: left;
+      animation: shake 0.4s ease-in-out;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+
+    .sample-usns-hint {
+      margin-top: 1.5rem;
+      padding-top: 1.2rem;
+      border-top: 1px dashed rgba(255, 255, 255, 0.1);
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .sample-chip {
+      display: inline-block;
+      background: rgba(168, 85, 247, 0.1);
+      border: 1px solid rgba(168, 85, 247, 0.2);
+      color: var(--neon-cyan);
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-family: monospace;
+      margin: 0.2rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .sample-chip:hover {
+      background: rgba(168, 85, 247, 0.25);
+    }
+
+    /* Welcome Overlay Modal */
+    #welcome-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(10px);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+
+    .welcome-card {
+      background: var(--bg-card-solid);
+      border: 2px solid var(--neon-cyan);
+      box-shadow: 0 0 35px var(--neon-cyan-glow);
+      border-radius: var(--radius-lg);
+      padding: 2.2rem 1.8rem;
+      text-align: center;
+      max-width: 420px;
+      width: 100%;
+      animation: zoomIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes zoomIn {
+      from { transform: scale(0.8); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    /* ==========================================================================
+       MAIN APP / INVITATION SITE STYLES
+       ========================================================================== */
+    #app-view {
+      display: none; /* hidden until login */
+      padding-bottom: 5rem;
+    }
+
+    /* Sticky Header Bar */
+    .top-nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(10, 11, 18, 0.85);
+      backdrop-filter: var(--glass-blur);
+      border-bottom: 1px solid var(--bg-card-border);
+      padding: 0.6rem 0;
+      transition: background-color 0.3s;
+    }
+    [data-theme="light"] .top-nav {
+      background: rgba(248, 250, 255, 0.9);
+    }
+
+    .nav-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+
+    .nav-user {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      min-width: 0;
+    }
+
+    .user-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: var(--accent-gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.85rem;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .user-meta {
+      min-width: 0;
+    }
+    .user-name-header {
+      font-weight: 700;
+      font-size: 0.85rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .user-usn-badge {
+      font-size: 0.7rem;
+      color: var(--neon-cyan);
+      font-family: monospace;
+      display: block;
+    }
+
+    .nav-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-shrink: 0;
+    }
+
+    .theme-toggle-btn {
+      background: transparent;
+      border: 1px solid var(--bg-card-border);
+      color: var(--text-primary);
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: border-color 0.2s;
+    }
+
+    /* Hero Section */
+    .hero-section {
+      text-align: center;
+      padding: 2.5rem 0 1.8rem;
+    }
+
+    .hero-greeting {
+      font-size: 1.1rem;
+      color: var(--neon-cyan);
+      font-weight: 600;
+      margin-bottom: 0.6rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+    }
+
+    .hero-title {
+      font-size: clamp(2.1rem, 6.5vw, 3.2rem);
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      margin-bottom: 0.8rem;
+    }
+
+    .hero-subtitle {
+      font-size: 1.05rem;
+      color: var(--text-secondary);
+      max-width: 480px;
+      margin: 0 auto 1.6rem;
+    }
+
+    /* Live Countdown Clock */
+    .countdown-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.6rem;
+      margin: 1.6rem auto;
+      max-width: 440px;
+    }
+
+    .countdown-card {
+      background: rgba(0, 0, 0, 0.35);
+      border: 1.5px solid var(--bg-card-border);
+      border-radius: var(--radius-md);
+      padding: 0.8rem 0.4rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: var(--glass-blur);
+    }
+    [data-theme="light"] .countdown-card {
+      background: rgba(255, 255, 255, 0.7);
+    }
+
+    .countdown-value {
+      font-family: var(--font-arcade);
+      font-size: clamp(1.1rem, 3.5vw, 1.5rem);
+      color: var(--neon-cyan);
+      display: block;
+      margin-bottom: 0.2rem;
+      text-shadow: 0 0 10px var(--neon-cyan-glow);
+    }
+
+    .countdown-label {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      justify-content: center;
+      margin-top: 1.5rem;
+    }
+
+    /* Event Details Grid */
+    .details-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.9rem;
+    }
+    @media (min-width: 520px) {
+      .details-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .detail-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.9rem;
+      padding: 1.1rem;
+      border-radius: var(--radius-md);
+      background: var(--bg-card);
+      border: 1px solid var(--bg-card-border);
+    }
+
+    .detail-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: rgba(168, 85, 247, 0.15);
+      border: 1px solid var(--neon-purple);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      flex-shrink: 0;
+    }
+
+    .detail-info h4 {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+      margin-bottom: 0.2rem;
+    }
+
+    .detail-info p {
+      font-weight: 600;
+      font-size: 1rem;
+      color: var(--text-primary);
+    }
+
+    .detail-info .sub-text {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      font-weight: normal;
+      margin-top: 0.15rem;
+    }
+
+    /* Guidelines / Rules Card */
+    .rules-card {
+      background: rgba(168, 85, 247, 0.08);
+      border: 1px dashed var(--neon-purple);
+      border-radius: var(--radius-md);
+      padding: 1.2rem;
+      margin-top: 1rem;
+    }
+    .rules-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--neon-purple);
+      margin-bottom: 0.6rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .rules-list {
+      list-style: none;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+    .rules-list li {
+      margin-bottom: 0.4rem;
+      position: relative;
+      padding-left: 1.3rem;
+    }
+    .rules-list li::before {
+      content: '👾';
+      position: absolute;
+      left: 0;
+      font-size: 0.75rem;
+    }
+
+    /* Schedule Timeline */
+    .timeline {
+      position: relative;
+      padding: 0.5rem 0 0.5rem 1.6rem;
+      margin-left: 0.5rem;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      top: 10px;
+      bottom: 10px;
+      left: 0;
+      width: 2px;
+      background: linear-gradient(to bottom, var(--neon-cyan), var(--neon-purple), var(--neon-pink));
+      border-radius: 2px;
+    }
+
+    .timeline-item {
+      position: relative;
+      margin-bottom: 1.5rem;
+    }
+    .timeline-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .timeline-dot {
+      position: absolute;
+      left: -1.6rem;
+      top: 4px;
+      transform: translateX(-50%);
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--bg-primary);
+      border: 3px solid var(--neon-cyan);
+      box-shadow: 0 0 10px var(--neon-cyan-glow);
+    }
+
+    .timeline-item:nth-child(even) .timeline-dot {
+      border-color: var(--neon-pink);
+      box-shadow: 0 0 10px var(--neon-pink-glow);
+    }
+
+    .timeline-time {
+      font-family: var(--font-arcade);
+      font-size: 0.68rem;
+      color: var(--neon-cyan);
+      margin-bottom: 0.2rem;
+    }
+
+    .timeline-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 0.2rem;
+    }
+
+    .timeline-desc {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    /* What to Expect Grid */
+    .expect-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.8rem;
+    }
+    @media (min-width: 580px) {
+      .expect-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .expect-card {
+      background: var(--bg-card);
+      border: 1px solid var(--bg-card-border);
+      border-radius: var(--radius-md);
+      padding: 1.1rem 0.9rem;
+      text-align: center;
+      transition: transform 0.25s, border-color 0.25s;
+    }
+    .expect-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--neon-cyan);
+      box-shadow: 0 5px 15px var(--neon-cyan-glow);
+    }
+
+    .expect-emoji {
+      font-size: 2rem;
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+
+    .expect-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 0.2rem;
+    }
+
+    .expect-desc {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      line-height: 1.35;
+    }
+
+    /* ==========================================================================
+       PERSONALIZED FRESHERS PASS (TICKET)
+       ========================================================================== */
+    .ticket-wrapper {
+      margin: 1.5rem 0;
+    }
+
+    #pass-card {
+      background: var(--ticket-bg);
+      border: 2px solid var(--neon-purple);
+      border-radius: var(--radius-lg);
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow-lg), 0 0 25px var(--neon-purple-glow);
+      color: #ffffff; /* always crisp dark text contrast on ticket */
+    }
+
+    /* Ticket Hologram Stripe */
+    .ticket-stripe {
+      height: 8px;
+      background: var(--accent-gradient);
+      width: 100%;
+    }
+
+    .ticket-header {
+      padding: 1.2rem 1.4rem 0.8rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px dashed rgba(255, 255, 255, 0.15);
+    }
+
+    .ticket-brand {
+      display: flex;
+      flex-direction: column;
+    }
+    .ticket-brand-college {
+      font-size: 0.68rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #cbd5e1;
+    }
+    .ticket-brand-event {
+      font-family: var(--font-heading);
+      font-weight: 800;
+      font-size: 1.15rem;
+      color: #38bdf8;
+    }
+
+    .ticket-badge {
+      font-family: var(--font-arcade);
+      font-size: 0.58rem;
+      padding: 0.3rem 0.6rem;
+      background: rgba(236, 72, 153, 0.25);
+      border: 1px solid var(--neon-pink);
+      color: #f472b6;
+      border-radius: 4px;
+      letter-spacing: 0.05em;
+    }
+
+    .ticket-body {
+      padding: 1.4rem;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 1.2rem;
+      align-items: center;
+    }
+
+    .ticket-student-info h3 {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: #ffffff;
+      line-height: 1.2;
+      margin-bottom: 0.2rem;
+    }
+
+    .ticket-usn-tag {
+      display: inline-block;
+      font-family: monospace;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #22d3ee;
+      background: rgba(34, 211, 238, 0.15);
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+      border: 1px solid rgba(34, 211, 238, 0.3);
+      margin-bottom: 0.8rem;
+    }
+
+    .ticket-meta-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.6rem;
+      font-size: 0.78rem;
+    }
+    .ticket-meta-item span {
+      display: block;
+      color: #94a3b8;
+      text-transform: uppercase;
+      font-size: 0.65rem;
+      letter-spacing: 0.05em;
+    }
+    .ticket-meta-item strong {
+      color: #f1f5f9;
+      font-size: 0.85rem;
+    }
+
+    .ticket-qr-area {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .qr-box {
+      width: 82px;
+      height: 82px;
+      background: #ffffff;
+      padding: 6px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+    .qr-box svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .qr-caption {
+      font-size: 0.6rem;
+      font-family: monospace;
+      color: #94a3b8;
+      margin-top: 0.4rem;
+      letter-spacing: 0.05em;
+    }
+
+    /* Perforated ticket punch out notches */
+    .ticket-perforation {
+      position: relative;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .ticket-notch-left, .ticket-notch-right {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--bg-primary);
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    .ticket-notch-left {
+      left: -11px;
+      border-right: 2px solid var(--neon-purple);
+    }
+    .ticket-notch-right {
+      right: -11px;
+      border-left: 2px solid var(--neon-purple);
+    }
+
+    .ticket-dash-line {
+      width: 100%;
+      border-bottom: 2px dashed rgba(255, 255, 255, 0.25);
+      margin: 0 16px;
+    }
+
+    .ticket-footer {
+      padding: 0.9rem 1.4rem;
+      background: rgba(0, 0, 0, 0.4);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.72rem;
+      color: #94a3b8;
+    }
+
+    .ticket-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      align-items: center;
+      margin-top: 1rem;
+    }
+
+    /* ==========================================================================
+       RSVP SECTION
+       ========================================================================== */
+    .rsvp-box {
+      text-align: center;
+    }
+
+    .rsvp-options {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.7rem;
+      margin-bottom: 1.5rem;
+    }
+    @media (min-width: 480px) {
+      .rsvp-options {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .rsvp-btn {
+      padding: 1rem 0.8rem;
+      border-radius: var(--radius-md);
+      border: 1.5px solid var(--bg-card-border);
+      background: var(--bg-card);
+      color: var(--text-primary);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .rsvp-btn:hover {
+      border-color: var(--neon-cyan);
+      transform: translateY(-2px);
+    }
+    .rsvp-btn.selected {
+      border-color: var(--neon-purple);
+      background: rgba(168, 85, 247, 0.2);
+      box-shadow: 0 0 18px var(--neon-purple-glow);
+    }
+    .rsvp-btn.selected-yes {
+      border-color: var(--neon-green);
+      background: rgba(16, 185, 129, 0.2);
+      box-shadow: 0 0 18px rgba(16, 185, 129, 0.4);
+    }
+
+    .rsvp-emoji {
+      font-size: 1.6rem;
+    }
+    .rsvp-label {
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+
+    .rsvp-feedback {
+      min-height: 24px;
+      margin-bottom: 1.2rem;
+      font-weight: 600;
+      font-size: 0.92rem;
+      color: var(--neon-cyan);
+    }
+
+    .song-box {
+      background: rgba(0, 0, 0, 0.2);
+      padding: 1.2rem;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--bg-card-border);
+      text-align: left;
+    }
+    [data-theme="light"] .song-box {
+      background: rgba(255, 255, 255, 0.7);
+    }
+
+    .song-input-row {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.6rem;
+    }
+
+    .song-input {
+      flex: 1;
+      padding: 0.7rem 0.9rem;
+      border-radius: var(--radius-sm);
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--bg-card-border);
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 0.9rem;
+      outline: none;
+    }
+    [data-theme="light"] .song-input {
+      background: #ffffff;
+    }
+    .song-input:focus {
+      border-color: var(--neon-pink);
+    }
+
+    /* FAQ Accordion */
+    .accordion-item {
+      border: 1px solid var(--bg-card-border);
+      border-radius: var(--radius-md);
+      margin-bottom: 0.7rem;
+      background: var(--bg-card);
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+
+    .accordion-trigger {
+      width: 100%;
+      padding: 1.1rem 1.2rem;
+      text-align: left;
+      background: transparent;
+      border: none;
+      color: var(--text-primary);
+      font-family: var(--font-heading);
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.8rem;
+    }
+
+    .accordion-icon {
+      font-size: 1.1rem;
+      transition: transform 0.25s ease;
+      color: var(--neon-cyan);
+      flex-shrink: 0;
+    }
+
+    .accordion-item.active .accordion-icon {
+      transform: rotate(180deg);
+      color: var(--neon-pink);
+    }
+
+    .accordion-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s cubic-bezier(0, 1, 0, 1);
+      padding: 0 1.2rem;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    .accordion-item.active .accordion-content {
+      max-height: 300px;
+      transition: max-height 0.3s ease-in-out;
+      padding-bottom: 1.1rem;
+    }
+
+    /* Footer & Contacts */
+    .site-footer {
+      border-top: 1px solid var(--bg-card-border);
+      padding: 2.5rem 0 1.5rem;
+      text-align: center;
+      background: rgba(0, 0, 0, 0.2);
+      margin-top: 2rem;
+    }
+
+    .organizer-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.8rem;
+      margin: 1.2rem 0 1.8rem;
+    }
+    @media (min-width: 480px) {
+      .organizer-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .organizer-card {
+      background: var(--bg-card);
+      border: 1px solid var(--bg-card-border);
+      border-radius: var(--radius-md);
+      padding: 0.9rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .organizer-name {
+      font-weight: 700;
+      font-size: 0.9rem;
+      text-align: left;
+    }
+    .organizer-role {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-align: left;
+    }
+
+    .organizer-contact-actions {
+      display: flex;
+      gap: 0.4rem;
+    }
+
+    .contact-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(168, 85, 247, 0.15);
+      border: 1px solid var(--neon-purple);
+      color: var(--neon-cyan);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      font-size: 0.95rem;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .contact-btn:hover {
+      background: var(--neon-purple);
+      color: #fff;
+      transform: scale(1.08);
+    }
+    .contact-btn.wa {
+      border-color: #25d366;
+      color: #25d366;
+    }
+    .contact-btn.wa:hover {
+      background: #25d366;
+      color: #fff;
+    }
+
+    .footer-note {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-top: 1.2rem;
+    }
+
+    /* Floating Back-to-Top */
+    .back-to-top {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.2rem;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: var(--accent-gradient);
+      border: none;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 15px var(--neon-purple-glow);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s, transform 0.2s;
+      z-index: 40;
+    }
+    .back-to-top.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .back-to-top:hover {
+      transform: translateY(-3px);
+    }
+
+    /* Screen Reader Only Utility */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient Retro Visuals -->
+  <div class="retro-grid-bg" aria-hidden="true"></div>
+  <div class="ambient-glow ambient-glow-1" aria-hidden="true"></div>
+  <div class="ambient-glow ambient-glow-2" aria-hidden="true"></div>
+
+  <!-- ==========================================================================
+       LOGIN VIEW (Step 1: USN Authentication)
+       ========================================================================== -->
+  <main id="login-view">
+    <div class="login-box">
+      <div class="arcade-coin-slot" aria-hidden="true">👾</div>
+      <span class="pixel-tag" style="margin-bottom: 0.8rem;">INSERT COIN &bull; ENTER USN</span>
+      
+      <h1 class="login-title">
+        <span class="gradient-text" id="login-event-name">Freshers 2026</span>
+      </h1>
+      <p class="login-desc" id="login-event-tagline">Level 1 Unlocked &bull; Seniors Invite Juniors</p>
+
+      <!-- Error Notification Box -->
+      <div id="login-error" class="error-msg" role="alert">
+        <!-- Injected via JavaScript -->
+      </div>
+
+      <form id="login-form" autocomplete="off">
+        <div class="input-group">
+          <label for="usn-input" class="input-label">University Seat Number (USN)</label>
+          <div class="usn-input-wrapper">
+            <span class="input-icon" aria-hidden="true">🎮</span>
+            <input 
+              type="text" 
+              id="usn-input" 
+              class="usn-input" 
+              placeholder="e.g. 1XX22CS001" 
+              maxlength="15" 
+              required
+              aria-describedby="usn-hint"
+              autofocus
+            >
+          </div>
+          <div id="usn-hint" class="login-helper">Enter your registered USN to reveal your personalized VIP pass.</div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%;">
+          <span>Unlock My Invitation</span> &rarr;
+        </button>
+      </form>
+
+      <!-- Sample USNs for Testing Demonstration -->
+      <div class="sample-usns-hint">
+        <div>💡 <strong>Sample USNs for testing:</strong></div>
+        <div style="margin-top: 0.4rem;" id="sample-chips-container">
+          <!-- Populated from students object -->
+        </div>
+      </div>
+    </div>
+  </main>
+
+
+  <!-- ==========================================================================
+       WELCOME ANIMATED OVERLAY (Step 2: Celebration Flash)
+       ========================================================================== -->
+  <div id="welcome-modal" role="dialog" aria-modal="true" aria-labelledby="modal-student-name">
+    <div class="welcome-card">
+      <div style="font-size: 3rem; margin-bottom: 0.5rem;" aria-hidden="true">🎉👾⚡</div>
+      <span class="pixel-tag" style="margin-bottom: 0.6rem;">ACCESS GRANTED</span>
+      <h2 id="modal-student-name" style="font-size: 1.6rem; margin-bottom: 0.4rem; color: #fff;">
+        Welcome, Aarav Sharma!
+      </h2>
+      <p style="color: var(--neon-cyan); font-weight: 600; margin-bottom: 1.4rem;">
+        You are officially invited to Freshers 2026!
+      </p>
+      <button id="enter-portal-btn" class="btn btn-primary" style="width: 100%;">
+        Enter The Party Arena &rarr;
+      </button>
+    </div>
+  </div>
+
+
+  <!-- ==========================================================================
+       MAIN INVITATION SITE (Step 3: Shown after login)
+       ========================================================================== -->
+  <div id="app-view">
+    
+    <!-- Sticky Top Navigation Bar -->
+    <header class="top-nav">
+      <div class="container nav-container">
+        <div class="nav-user">
+          <div class="user-avatar" id="nav-avatar">A</div>
+          <div class="user-meta">
+            <div class="user-name-header" id="nav-student-name">Student Name</div>
+            <span class="user-usn-badge" id="nav-student-usn">1XX22CS001</span>
+          </div>
+        </div>
+
+        <div class="nav-controls">
+          <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle dark/light theme" title="Toggle theme">
+            🌙
+          </button>
+          <button id="logout-btn" class="btn btn-outline btn-sm" title="Log out from this pass">
+            Logout
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div class="container">
+      
+      <!-- HERO SECTION -->
+      <section class="hero-section" id="hero">
+        <div class="pixel-tag" style="margin-bottom: 0.8rem;">
+          🕹️ MISSION: WELCOME JUNIORS
+        </div>
+
+        <div class="hero-greeting">
+          <span>👋 Hey</span>
+          <span class="gradient-text" id="hero-student-name">Aarav Sharma</span>!
+        </div>
+
+        <h1 class="hero-title" id="hero-event-title">
+          Freshers 2026:<br>
+          <span class="gradient-text">Level 1 Unlocked</span>
+        </h1>
+
+        <p class="hero-subtitle" id="hero-tagline">
+          The battle of lectures pauses now. Your seniors have assembled the ultimate kickoff party of the year!
+        </p>
+
+        <!-- Live Countdown Timer -->
+        <div class="countdown-grid" role="timer" aria-live="polite">
+          <div class="countdown-card">
+            <span class="countdown-value" id="cd-days">00</span>
+            <span class="countdown-label">Days</span>
+          </div>
+          <div class="countdown-card">
+            <span class="countdown-value" id="cd-hours">00</span>
+            <span class="countdown-label">Hours</span>
+          </div>
+          <div class="countdown-card">
+            <span class="countdown-value" id="cd-minutes">00</span>
+            <span class="countdown-label">Minutes</span>
+          </div>
+          <div class="countdown-card">
+            <span class="countdown-value" id="cd-seconds">00</span>
+            <span class="countdown-label">Seconds</span>
+          </div>
+        </div>
+
+        <div class="hero-actions">
+          <a href="#ticket-section" class="btn btn-primary">
+            <span>🎟️ View VIP Pass</span>
+          </a>
+          <a href="#rsvp-section" class="btn btn-outline">
+            <span>⚡ RSVP Now</span>
+          </a>
+        </div>
+      </section>
+
+
+      <!-- EVENT DETAILS SECTION -->
+      <section class="card" id="details" style="margin-top: 1.5rem;">
+        <h2 class="section-title">
+          <span>📍</span> Party Coordinates
+        </h2>
+        <p class="section-subtitle">Mark your calendars and assemble on time</p>
+
+        <div class="details-grid">
+          <!-- Date -->
+          <div class="detail-card">
+            <div class="detail-icon">📅</div>
+            <div class="detail-info">
+              <h4>Date</h4>
+              <p id="detail-date">13 October 2026</p>
+              <div class="sub-text">Tuesday Evening</div>
+            </div>
+          </div>
+
+          <!-- Time -->
+          <div class="detail-card">
+            <div class="detail-icon">⏰</div>
+            <div class="detail-info">
+              <h4>Time</h4>
+              <p id="detail-time">5:00 PM onwards</p>
+              <div class="sub-text">Gates open at 4:30 PM</div>
+            </div>
+          </div>
+
+          <!-- Venue -->
+          <div class="detail-card">
+            <div class="detail-icon">🏛️</div>
+            <div class="detail-info">
+              <h4>Venue</h4>
+              <p id="detail-venue">Grand Campus Auditorium & Amphitheatre</p>
+              <div class="sub-text" id="detail-college">Dept. of Computer Science & AIML</div>
+            </div>
+          </div>
+
+          <!-- Dress Code -->
+          <div class="detail-card">
+            <div class="detail-icon">👔</div>
+            <div class="detail-info">
+              <h4>Dress Code</h4>
+              <p id="detail-dresscode">Retro Arcade / Cyber Chic</p>
+              <div class="sub-text">Neon, Brights or Smart Casuals</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Venue Navigation Link Button -->
+        <div style="margin-top: 1.2rem; text-align: center;">
+          <a id="venue-map-link" href="https://maps.google.com" target="_blank" rel="noopener noreferrer" class="btn btn-cyan btn-sm">
+            <span>🗺️ Open in Google Maps</span> &rarr;
+          </a>
+        </div>
+
+        <!-- Rules & Guidelines -->
+        <div class="rules-card">
+          <div class="rules-title">
+            <span>📜</span> Party Guidelines & Entry Rules
+          </div>
+          <ul class="rules-list">
+            <li>Digital pass + College ID Card verification mandatory at the entrance.</li>
+            <li>Entry strictly restricted to 1st year juniors of the department.</li>
+            <li>No outside food, beverages, or sharp objects allowed inside the arena.</li>
+            <li>Keep the vibe lively, respect everyone, and get ready for a memorable night!</li>
+          </ul>
+        </div>
+      </section>
+
+
+      <!-- SCHEDULE / TIMELINE SECTION -->
+      <section class="card" id="schedule">
+        <h2 class="section-title">
+          <span>⏳</span> Quest Timeline
+        </h2>
+        <p class="section-subtitle">Chronological sequence of games, performances & feasts</p>
+
+        <div class="timeline" id="timeline-container">
+          <!-- Timeline items injected via JavaScript -->
+        </div>
+      </section>
+
+
+      <!-- WHAT TO EXPECT SECTION -->
+      <section class="card" id="highlights">
+        <h2 class="section-title">
+          <span>✨</span> What To Expect
+        </h2>
+        <p class="section-subtitle">Loaded with high voltage fun, music & memories</p>
+
+        <div class="expect-grid">
+          <div class="expect-card">
+            <span class="expect-emoji">🎧</span>
+            <div class="expect-title">DJ & Bass Stage</div>
+            <div class="expect-desc">Non-stop electronic, Bollywood & commercial beats.</div>
+          </div>
+          <div class="expect-card">
+            <span class="expect-emoji">🎮</span>
+            <div class="expect-title">Arcade Games</div>
+            <div class="expect-desc">Quick mini-battles, icebreakers and fun senior-junior duos.</div>
+          </div>
+          <div class="expect-card">
+            <span class="expect-emoji">💃</span>
+            <div class="expect-title">Ramp & Talents</div>
+            <div class="expect-desc">Show your flair and compete for Mr. & Ms. Fresher!</div>
+          </div>
+          <div class="expect-card">
+            <span class="expect-emoji">🍕</span>
+            <div class="expect-title">Lavish Buffet</div>
+            <div class="expect-desc">Delicious multi-cuisine dinner spread & refreshments.</div>
+          </div>
+          <div class="expect-card">
+            <span class="expect-emoji">📸</span>
+            <div class="expect-title">360° Photo Booth</div>
+            <div class="expect-desc">Capture Instagram-ready clips with retro neon props.</div>
+          </div>
+          <div class="expect-card">
+            <span class="expect-emoji">🏆</span>
+            <div class="expect-title">Fresher Titles</div>
+            <div class="expect-desc">Crowns, certificates, and exciting goodie hampers.</div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- PERSONALIZED FRESHERS PASS (TICKET) -->
+      <section class="card" id="ticket-section">
+        <h2 class="section-title">
+          <span>🎟️</span> Personalized VIP Pass
+        </h2>
+        <p class="section-subtitle">Your digital access credential. Save or screenshot for entry!</p>
+
+        <div class="ticket-wrapper">
+          <!-- The Ticket Element Captured by html2canvas -->
+          <div id="pass-card">
+            <div class="ticket-stripe"></div>
+            
+            <div class="ticket-header">
+              <div class="ticket-brand">
+                <span class="ticket-brand-college" id="pass-college">AIML & CSE DEPARTMENT</span>
+                <span class="ticket-brand-event" id="pass-event-title">FRESHERS 2026</span>
+              </div>
+              <div class="ticket-badge">VIP &bull; LEVEL 1</div>
+            </div>
+
+            <div class="ticket-body">
+              <div class="ticket-student-info">
+                <span style="font-size: 0.7rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; display: block;">Invited Guest</span>
+                <h3 id="pass-student-name">Aarav Sharma</h3>
+                <div class="ticket-usn-tag" id="pass-student-usn">1XX22CS001</div>
+                
+                <div class="ticket-meta-grid">
+                  <div class="ticket-meta-item">
+                    <span>Date</span>
+                    <strong id="pass-date">13 Oct 2026</strong>
+                  </div>
+                  <div class="ticket-meta-item">
+                    <span>Time</span>
+                    <strong id="pass-time">5:00 PM</strong>
+                  </div>
+                  <div class="ticket-meta-item">
+                    <span>Tier</span>
+                    <strong>ALL ACCESS</strong>
+                  </div>
+                  <div class="ticket-meta-item">
+                    <span>Status</span>
+                    <strong style="color: #4ade80;">CONFIRMED</strong>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Decorative QR Code (Inline SVG for instant crisp rendering) -->
+              <div class="ticket-qr-area">
+                <div class="qr-box" title="Verified QR Pass">
+                  <svg viewBox="0 0 100 100" fill="#0f172a" aria-hidden="true">
+                    <!-- Crisp stylized QR code blocks -->
+                    <rect x="5" y="5" width="28" height="28" fill="#0f172a" rx="4"/>
+                    <rect x="10" y="10" width="18" height="18" fill="#ffffff" rx="2"/>
+                    <rect x="14" y="14" width="10" height="10" fill="#0f172a"/>
+                    
+                    <rect x="67" y="5" width="28" height="28" fill="#0f172a" rx="4"/>
+                    <rect x="72" y="10" width="18" height="18" fill="#ffffff" rx="2"/>
+                    <rect x="76" y="14" width="10" height="10" fill="#0f172a"/>
+                    
+                    <rect x="5" y="67" width="28" height="28" fill="#0f172a" rx="4"/>
+                    <rect x="10" y="72" width="18" height="18" fill="#ffffff" rx="2"/>
+                    <rect x="14" y="76" width="10" height="10" fill="#0f172a"/>
+
+                    <!-- Data dots -->
+                    <rect x="42" y="10" width="7" height="7"/>
+                    <rect x="52" y="15" width="7" height="7"/>
+                    <rect x="42" y="25" width="7" height="7"/>
+                    <rect x="10" y="42" width="7" height="7"/>
+                    <rect x="25" y="42" width="7" height="7"/>
+                    <rect x="40" y="42" width="20" height="7"/>
+                    <rect x="70" y="42" width="10" height="7"/>
+                    <rect x="85" y="42" width="8" height="7"/>
+                    <rect x="45" y="55" width="10" height="7"/>
+                    <rect x="62" y="55" width="8" height="18"/>
+                    <rect x="75" y="60" width="15" height="7"/>
+                    <rect x="45" y="70" width="10" height="15"/>
+                    <rect x="75" y="75" width="12" height="12"/>
+                    <rect x="88" y="70" width="7" height="7"/>
+                  </svg>
+                </div>
+                <div class="qr-caption" id="pass-sec-hash">SEC-2026-PASS</div>
+              </div>
+            </div>
+
+            <!-- Perforation line -->
+            <div class="ticket-perforation" aria-hidden="true">
+              <div class="ticket-notch-left"></div>
+              <div class="ticket-dash-line"></div>
+              <div class="ticket-notch-right"></div>
+            </div>
+
+            <div class="ticket-footer">
+              <span id="pass-footer-venue">📍 Campus Grand Auditorium</span>
+              <span>HOSTED BY SENIORS ❤️</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="ticket-actions">
+          <button id="download-pass-btn" class="btn btn-primary" style="width: 100%; max-width: 320px;">
+            <span>📥 Download Pass (PNG)</span>
+          </button>
+          <div style="font-size: 0.78rem; color: var(--text-muted);">
+            Pro-tip: Take a screenshot or save it to your camera roll for speedy gate entry!
+          </div>
+        </div>
+      </section>
+
+
+      <!-- RSVP & SONG REQUEST SECTION -->
+      <section class="card rsvp-box" id="rsvp-section">
+        <h2 class="section-title">
+          <span>📬</span> Will You Be There?
+        </h2>
+        <p class="section-subtitle">Let your seniors know so we can reserve your feast & merch!</p>
+
+        <div class="rsvp-options" role="radiogroup" aria-label="RSVP Response">
+          <button class="rsvp-btn" data-status="yes" role="radio" aria-checked="false">
+            <span class="rsvp-emoji">🎉</span>
+            <span class="rsvp-label">Count Me In!</span>
+            <span style="font-size: 0.75rem; color: var(--text-muted);">100% hyped</span>
+          </button>
+
+          <button class="rsvp-btn" data-status="maybe" role="radio" aria-checked="false">
+            <span class="rsvp-emoji">🤔</span>
+            <span class="rsvp-label">Maybe</span>
+            <span style="font-size: 0.75rem; color: var(--text-muted);">Deciding soon</span>
+          </button>
+
+          <button class="rsvp-btn" data-status="no" role="radio" aria-checked="false">
+            <span class="rsvp-emoji">😢</span>
+            <span class="rsvp-label">Can't Make It</span>
+            <span style="font-size: 0.75rem; color: var(--text-muted);">Missing out</span>
+          </button>
+        </div>
+
+        <!-- Dynamic Feedback Display -->
+        <div id="rsvp-status-msg" class="rsvp-feedback">
+          <!-- Text updated via JS -->
+        </div>
+
+        <!-- DJ Song Request Box -->
+        <div class="song-box">
+          <div style="font-size: 0.95rem; font-weight: 700;">
+            🎵 Drop Your DJ Song Request
+          </div>
+          <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.15rem;">
+            Which track is guaranteed to get you running onto the dance floor?
+          </p>
+          <div class="song-input-row">
+            <input 
+              type="text" 
+              id="song-input" 
+              class="song-input" 
+              placeholder="e.g. Starboy - The Weeknd / Desi Kalakaar" 
+              maxlength="100"
+            >
+            <button id="song-submit-btn" class="btn btn-primary btn-sm">
+              Send 🎶
+            </button>
+          </div>
+          <div id="song-feedback" style="font-size: 0.8rem; margin-top: 0.5rem; display: none;"></div>
+        </div>
+      </section>
+
+
+      <!-- FAQ ACCORDION SECTION -->
+      <section class="card" id="faq">
+        <h2 class="section-title">
+          <span>❓</span> Frequently Asked Questions
+        </h2>
+        <p class="section-subtitle">Everything you wondered about the party answered</p>
+
+        <div id="faq-accordion-container">
+          <!-- FAQ items injected via JavaScript -->
+        </div>
+      </section>
+
+    </div><!-- /container -->
+
+    <!-- FOOTER & ORGANIZER CONTACTS -->
+    <footer class="site-footer">
+      <div class="container">
+        <h3 style="font-size: 1.15rem; margin-bottom: 0.3rem;">Need Help or Queries?</h3>
+        <p style="font-size: 0.88rem; color: var(--text-secondary);">Reach out directly to your senior student coordinators:</p>
+
+        <!-- Dynamic Organizer Contacts -->
+        <div class="organizer-grid" id="organizers-container">
+          <!-- Injected via JavaScript -->
+        </div>
+
+        <div style="margin-top: 1.5rem;">
+          <div class="pixel-tag">LEVEL 1 UNLOCKED &bull; BATCH 2026</div>
+        </div>
+
+        <p class="footer-note">
+          Crafted with 💜 and excitement by your Seniors.<br>
+          We can't wait to see you there!
+        </p>
+      </div>
+    </footer>
+
+    <!-- Back to top floating button -->
+    <button id="back-to-top" class="back-to-top" aria-label="Back to top" title="Scroll to top">
+      ↑
+    </button>
+  </div>
+
+
+  <!-- ==========================================================================
+       JAVASCRIPT: CONFIGURATION & LOGIC
+       ========================================================================== -->
+  <script>
+    /**
+     * ==========================================================================
+     * 1. EVENT CONFIGURATION
+     * Edit the event details, timeline, questions, and organizers here.
+     * ==========================================================================
+     */
+    const EVENT_CONFIG = {
+      name: "Freshers 2026: Level 1 Unlocked",
+      tagline: "The Official Senior-Junior Kickoff Party",
+      targetDate: "2026-10-13T17:00:00", // Year-Month-DayTHour:Minute:Second (5:00 PM)
+      displayDate: "13 October 2026",
+      displayTime: "5:00 PM onwards",
+      venueName: "Grand Campus Auditorium & Open Amphitheatre",
+      venueShort: "Campus Grand Auditorium",
+      googleMapsUrl: "https://maps.google.com/?q=Campus+Auditorium",
+      dressCode: "Retro Arcade / Cyber Chic",
+      department: "Dept. of Computer Science & AIML",
+      college: "Global Institute of Technology & Engineering",
+
+      // Senior Organizers (Displayed in Footer with One-Tap Call & WhatsApp)
+      organizers: [
+        { name: "Rohan Verma", phone: "+919876543210", role: "Event Lead (Senior)" },
+        { name: "Ananya Deshmukh", phone: "+919812345678", role: "Junior Coordinator" },
+        { name: "Karthik Raja", phone: "+919845678901", role: "Hospitality & Stage" }
+      ],
+
+      // Timeline Schedule Activities
+      timeline: [
+        { time: "05:00 PM", title: "Red Carpet & Player Spawn", desc: "Collect your neon glow wristbands, mocktails & entry swag." },
+        { time: "05:45 PM", title: "The Kickoff & Senior Intro", desc: "Hype host addresses the freshers with icebreakers & roast session." },
+        { time: "06:30 PM", title: "Battle of the Batches", desc: "Interactive multiplayer challenges, talent hunt & casual ramp walk." },
+        { time: "07:45 PM", title: "Live Band & Flash Mob", desc: "College rock band showcase followed by an electrifying senior flash mob." },
+        { time: "08:30 PM", title: "Feast Mode Activated", desc: "Lavish multi-course buffet dinner, desserts and photo booth madness." },
+        { time: "09:15 PM", title: "High-Voltage DJ Night", desc: "Turn up the bass on the neon dance floor with resident campus DJs." },
+        { time: "10:30 PM", title: "Crowning & Sendoff", desc: "Announcement of Mr. & Ms. Fresher 2026 followed by farewell cheers." }
+      ],
+
+      // FAQ Questions
+      faqs: [
+        {
+          q: "Who is eligible to attend this party?",
+          a: "All newly admitted 1st year students (Freshers) belonging to the department are warmly invited! Your USN grants you free access."
+        },
+        {
+          q: "Is there any entry fee or pass charge?",
+          a: "Zero! This event is fully hosted and sponsored by your seniors. There is absolutely no charge for entry, food, or activities."
+        },
+        {
+          q: "What should I wear for the 'Retro Arcade' dress code?",
+          a: "Wear bright colours, neon accents, cyber chic, cool casuals, or smart casuals! Think sneakers, fun jackets, graphic tees, or vibrant party wear."
+        },
+        {
+          q: "Can I bring a friend or plus one from outside?",
+          a: "To ensure adequate catering and auditorium capacity, entry is strictly restricted to students whose USNs are in the official guest registry."
+        },
+        {
+          q: "What do I need to bring at the entrance?",
+          a: "Just your digital pass (downloaded or on this website) and your physical College ID card (or admission slip)."
+        }
+      ]
+    };
+
+
+    /**
+     * ==========================================================================
+     * 2. STUDENT DATABASE (PASTE REAL LIST HERE)
+     * Format: { "USN": "Full Student Name", ... }
+     * ==========================================================================
+     */
+    const STUDENTS_DATABASE = {
+      "1XX22CS001": "Aarav Sharma",
+      "1XX22CS002": "Priya Nandakumar",
+      "1XX22CS003": "Rohan Deshmukh",
+      "1XX22CS004": "Sneha Kulkarni",
+      "1XX22CS005": "Aditya Hegde",
+      "1XX22CS006": "Meera Iyer",
+      "1XX22CS007": "Farhan Akhtar",
+      "1XX22CS008": "Tanya Sengupta",
+      "1XX22CS009": "Varun Tej",
+      "1XX22CS010": "Ananya Nair"
+    };
+
+
+    /**
+     * ==========================================================================
+     * 3. APPLICATION STATE & PERSISTENCE
+     * ==========================================================================
+     */
+    const STATE = {
+      currentUsn: null,
+      currentStudentName: null,
+      rsvpStatus: null,
+      countdownInterval: null
+    };
+
+
+    /**
+     * ==========================================================================
+     * 4. DOM ELEMENTS CACHE
+     * ==========================================================================
+     */
+    const DOM = {
+      loginView: document.getElementById('login-view'),
+      appView: document.getElementById('app-view'),
+      loginForm: document.getElementById('login-form'),
+      usnInput: document.getElementById('usn-input'),
+      loginError: document.getElementById('login-error'),
+      sampleChipsContainer: document.getElementById('sample-chips-container'),
+
+      // Welcome Modal
+      welcomeModal: document.getElementById('welcome-modal'),
+      modalStudentName: document.getElementById('modal-student-name'),
+      enterPortalBtn: document.getElementById('enter-portal-btn'),
+
+      // Nav
+      navStudentName: document.getElementById('nav-student-name'),
+      navStudentUsn: document.getElementById('nav-student-usn'),
+      navAvatar: document.getElementById('nav-avatar'),
+      themeToggle: document.getElementById('theme-toggle'),
+      logoutBtn: document.getElementById('logout-btn'),
+
+      // Hero
+      heroStudentName: document.getElementById('hero-student-name'),
+      heroEventTitle: document.getElementById('hero-event-title'),
+      heroTagline: document.getElementById('hero-tagline'),
+
+      // Countdown
+      cdDays: document.getElementById('cd-days'),
+      cdHours: document.getElementById('cd-hours'),
+      cdMinutes: document.getElementById('cd-minutes'),
+      cdSeconds: document.getElementById('cd-seconds'),
+
+      // Details
+      detailDate: document.getElementById('detail-date'),
+      detailTime: document.getElementById('detail-time'),
+      detailVenue: document.getElementById('detail-venue'),
+      detailCollege: document.getElementById('detail-college'),
+      detailDresscode: document.getElementById('detail-dresscode'),
+      venueMapLink: document.getElementById('venue-map-link'),
+
+      // Timeline & FAQ & Organizers
+      timelineContainer: document.getElementById('timeline-container'),
+      faqContainer: document.getElementById('faq-accordion-container'),
+      organizersContainer: document.getElementById('organizers-container'),
+
+      // Pass
+      passCard: document.getElementById('pass-card'),
+      passStudentName: document.getElementById('pass-student-name'),
+      passStudentUsn: document.getElementById('pass-student-usn'),
+      passCollege: document.getElementById('pass-college'),
+      passEventTitle: document.getElementById('pass-event-title'),
+      passDate: document.getElementById('pass-date'),
+      passTime: document.getElementById('pass-time'),
+      passSecHash: document.getElementById('pass-sec-hash'),
+      passFooterVenue: document.getElementById('pass-footer-venue'),
+      downloadPassBtn: document.getElementById('download-pass-btn'),
+
+      // RSVP
+      rsvpButtons: document.querySelectorAll('.rsvp-btn'),
+      rsvpStatusMsg: document.getElementById('rsvp-status-msg'),
+      songInput: document.getElementById('song-input'),
+      songSubmitBtn: document.getElementById('song-submit-btn'),
+      songFeedback: document.getElementById('song-feedback'),
+
+      // Back to top
+      backToTop: document.getElementById('back-to-top')
+    };
+
+
+    /**
+     * ==========================================================================
+     * 5. INITIALIZATION
+     * ==========================================================================
+     */
+    function initApp() {
+      // Setup dynamic UI content from CONFIG
+      populateEventDetails();
+      populateSampleChips();
+      populateTimeline();
+      populateFaqs();
+      populateOrganizers();
+      initTheme();
+      initCountdown();
+      setupEventListeners();
+
+      // Check session storage for existing session
+      const savedUsn = sessionStorage.getItem('freshers_party_usn');
+      if (savedUsn && STUDENTS_DATABASE[savedUsn]) {
+        authenticateUser(savedUsn, false); // No welcome modal if returning
+      } else {
+        showLoginView();
+      }
+    }
+
+
+    /**
+     * Populates static content from EVENT_CONFIG
+     */
+    function populateEventDetails() {
+      DOM.detailDate.textContent = EVENT_CONFIG.displayDate;
+      DOM.detailTime.textContent = EVENT_CONFIG.displayTime;
+      DOM.detailVenue.textContent = EVENT_CONFIG.venueName;
+      DOM.detailCollege.textContent = EVENT_CONFIG.college + ' &bull; ' + EVENT_CONFIG.department;
+      DOM.detailDresscode.textContent = EVENT_CONFIG.dressCode;
+      DOM.venueMapLink.href = EVENT_CONFIG.googleMapsUrl;
+
+      // Pass card details
+      DOM.passCollege.textContent = EVENT_CONFIG.department.toUpperCase();
+      DOM.passEventTitle.textContent = EVENT_CONFIG.name.split(':')[0].toUpperCase();
+      DOM.passDate.textContent = EVENT_CONFIG.displayDate;
+      DOM.passTime.textContent = EVENT_CONFIG.displayTime.split(' ')[0] + ' ' + EVENT_CONFIG.displayTime.split(' ')[1];
+      DOM.passFooterVenue.textContent = '📍 ' + EVENT_CONFIG.venueShort;
+    }
+
+
+    /**
+     * Render 5 sample USN chips on login screen for easy testing
+     */
+    function populateSampleChips() {
+      DOM.sampleChipsContainer.innerHTML = '';
+      const sampleKeys = Object.keys(STUDENTS_DATABASE).slice(0, 5);
+      sampleKeys.forEach(usn => {
+        const chip = document.createElement('span');
+        chip.className = 'sample-chip';
+        chip.textContent = usn;
+        chip.title = `Click to autofill: ${STUDENTS_DATABASE[usn]}`;
+        chip.addEventListener('click', () => {
+          DOM.usnInput.value = usn;
+          DOM.usnInput.focus();
+        });
+        DOM.sampleChipsContainer.appendChild(chip);
+      });
+    }
+
+
+    /**
+     * Populate Schedule Timeline
+     */
+    function populateTimeline() {
+      DOM.timelineContainer.innerHTML = '';
+      EVENT_CONFIG.timeline.forEach(item => {
+        const el = document.createElement('div');
+        el.className = 'timeline-item';
+        el.innerHTML = `
+          <div class="timeline-dot" aria-hidden="true"></div>
+          <div class="timeline-time">${escapeHtml(item.time)}</div>
+          <div class="timeline-title">${escapeHtml(item.title)}</div>
+          <div class="timeline-desc">${escapeHtml(item.desc)}</div>
+        `;
+        DOM.timelineContainer.appendChild(el);
+      });
+    }
+
+
+    /**
+     * Populate FAQ Accordion
+     */
+    function populateFaqs() {
+      DOM.faqContainer.innerHTML = '';
+      EVENT_CONFIG.faqs.forEach((faq, index) => {
+        const item = document.createElement('div');
+        item.className = 'accordion-item';
+        item.innerHTML = `
+          <button class="accordion-trigger" aria-expanded="false" id="faq-btn-${index}">
+            <span>${escapeHtml(faq.q)}</span>
+            <span class="accordion-icon" aria-hidden="true">&#9660;</span>
+          </button>
+          <div class="accordion-content" id="faq-content-${index}" role="region" aria-labelledby="faq-btn-${index}">
+            <p>${escapeHtml(faq.a)}</p>
+          </div>
+        `;
+
+        const trigger = item.querySelector('.accordion-trigger');
+        trigger.addEventListener('click', () => {
+          const isActive = item.classList.contains('active');
+          // Close other accordion items
+          document.querySelectorAll('.accordion-item').forEach(other => {
+            if (other !== item) {
+              other.classList.remove('active');
+              other.querySelector('.accordion-trigger').setAttribute('aria-expanded', 'false');
+            }
+          });
+          // Toggle current
+          if (isActive) {
+            item.classList.remove('active');
+            trigger.setAttribute('aria-expanded', 'false');
+          } else {
+            item.classList.add('active');
+            trigger.setAttribute('aria-expanded', 'true');
+          }
+        });
+
+        DOM.faqContainer.appendChild(item);
+      });
+    }
+
+
+    /**
+     * Populate Organizers in Footer
+     */
+    function populateOrganizers() {
+      DOM.organizersContainer.innerHTML = '';
+      EVENT_CONFIG.organizers.forEach(org => {
+        const cleanPhone = org.phone.replace(/[^0-9]/g, '');
+        const card = document.createElement('div');
+        card.className = 'organizer-card';
+        card.innerHTML = `
+          <div>
+            <div class="organizer-name">${escapeHtml(org.name)}</div>
+            <div class="organizer-role">${escapeHtml(org.role)}</div>
+          </div>
+          <div class="organizer-contact-actions">
+            <a href="tel:${escapeHtml(org.phone)}" class="contact-btn" title="Call ${escapeHtml(org.name)}" aria-label="Call ${escapeHtml(org.name)}">
+              📞
+            </a>
+            <a href="https://wa.me/${cleanPhone}?text=Hi%20${encodeURIComponent(org.name)},%20I%20have%20a%20query%20regarding%20Freshers%202026" 
+               target="_blank" rel="noopener noreferrer" class="contact-btn wa" title="WhatsApp ${escapeHtml(org.name)}" aria-label="WhatsApp ${escapeHtml(org.name)}">
+              💬
+            </a>
+          </div>
+        `;
+        DOM.organizersContainer.appendChild(card);
+      });
+    }
+
+
+    /**
+     * ==========================================================================
+     * 6. AUTHENTICATION & LOGIN LOGIC
+     * ==========================================================================
+     */
+    function handleLoginSubmit(e) {
+      e.preventDefault();
+      hideLoginError();
+
+      const rawInput = DOM.usnInput.value;
+      if (!rawInput) return;
+
+      // 1. Convert to uppercase and trim spaces
+      const formattedUsn = rawInput.trim().toUpperCase();
+
+      // 2. Validate format: letters and numbers only, length between 5 and 15
+      const usnFormatRegex = /^[A-Z0-9]{5,15}$/;
+      if (!usnFormatRegex.test(formattedUsn)) {
+        showLoginError("Invalid USN format. Please enter your valid University Seat Number (letters and digits only).");
+        return;
+      }
+
+      // 3. Lookup in database
+      if (STUDENTS_DATABASE.hasOwnProperty(formattedUsn)) {
+        authenticateUser(formattedUsn, true); // true = show welcome celebration modal
+      } else {
+        const leadContact = EVENT_CONFIG.organizers[0] 
+          ? `${EVENT_CONFIG.organizers[0].name} (${EVENT_CONFIG.organizers[0].phone})` 
+          : "your senior coordinator";
+        showLoginError(`USN "${formattedUsn}" not found in guest list. If you are a 1st year student, please contact ${leadContact} to be added.`);
+      }
+    }
+
+
+    function authenticateUser(usn, isNewLogin) {
+      STATE.currentUsn = usn;
+      STATE.currentStudentName = STUDENTS_DATABASE[usn];
+
+      // Save to sessionStorage so refresh remembers
+      sessionStorage.setItem('freshers_party_usn', usn);
+
+      // Update all personalized views
+      updatePersonalizedData();
+
+      if (isNewLogin) {
+        // Show Welcome Modal with Confetti Celebration
+        DOM.modalStudentName.textContent = `Welcome, ${STATE.currentStudentName}!`;
+        DOM.welcomeModal.style.display = 'flex';
+        triggerConfetti(2.5); // 2.5 second confetti burst
+      } else {
+        showAppView();
+      }
+    }
+
+
+    function updatePersonalizedData() {
+      const name = STATE.currentStudentName;
+      const usn = STATE.currentUsn;
+
+      // Header
+      DOM.navStudentName.textContent = name;
+      DOM.navStudentUsn.textContent = usn;
+      DOM.navAvatar.textContent = name.charAt(0);
+
+      // Hero
+      DOM.heroStudentName.textContent = name;
+
+      // Ticket Pass
+      DOM.passStudentName.textContent = name;
+      DOM.passStudentUsn.textContent = usn;
+      DOM.passSecHash.textContent = `SEC-${usn.slice(-4)}-${Math.floor(Date.now() / 100000).toString(16).toUpperCase()}`;
+
+      // RSVP state restoration from localStorage
+      loadSavedRsvp();
+    }
+
+
+    function showLoginError(msg) {
+      DOM.loginError.innerHTML = msg;
+      DOM.loginError.style.display = 'block';
+    }
+
+    function hideLoginError() {
+      DOM.loginError.style.display = 'none';
+      DOM.loginError.innerHTML = '';
+    }
+
+    function showAppView() {
+      DOM.welcomeModal.style.display = 'none';
+      DOM.loginView.style.display = 'none';
+      DOM.appView.style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function showLoginView() {
+      DOM.appView.style.display = 'none';
+      DOM.welcomeModal.style.display = 'none';
+      DOM.loginView.style.display = 'flex';
+      DOM.usnInput.value = '';
+      hideLoginError();
+      DOM.usnInput.focus();
+    }
+
+    function logoutUser() {
+      sessionStorage.removeItem('freshers_party_usn');
+      STATE.currentUsn = null;
+      STATE.currentStudentName = null;
+      STATE.rsvpStatus = null;
+      showLoginView();
+    }
+
+
+    /**
+     * ==========================================================================
+     * 7. RSVP & SONG REQUEST LOGIC
+     * ==========================================================================
+     */
+    function handleRsvpClick(btn) {
+      const status = btn.getAttribute('data-status');
+      STATE.rsvpStatus = status;
+
+      // Save to localStorage for this specific USN
+      if (STATE.currentUsn) {
+        localStorage.setItem(`rsvp_${STATE.currentUsn}`, status);
+      }
+
+      applyRsvpUI(status, true);
+    }
+
+    function applyRsvpUI(status, shouldCelebrate) {
+      DOM.rsvpButtons.forEach(b => {
+        b.classList.remove('selected', 'selected-yes');
+        b.setAttribute('aria-checked', 'false');
+      });
+
+      const activeBtn = document.querySelector(`.rsvp-btn[data-status="${status}"]`);
+      if (activeBtn) {
+        if (status === 'yes') {
+          activeBtn.classList.add('selected-yes');
+        } else {
+          activeBtn.classList.add('selected');
+        }
+        activeBtn.setAttribute('aria-checked', 'true');
+      }
+
+      // Feedback message
+      if (status === 'yes') {
+        DOM.rsvpStatusMsg.textContent = `🎉 Awesome ${STATE.currentStudentName}! Your spot has been reserved. See you on the dance floor!`;
+        DOM.rsvpStatusMsg.style.color = '#10b981';
+        if (shouldCelebrate) {
+          triggerConfetti(3);
+        }
+      } else if (status === 'maybe') {
+        DOM.rsvpStatusMsg.textContent = `🤔 Got it, ${STATE.currentStudentName}! We hope you can make it. Reach out to seniors if you have queries!`;
+        DOM.rsvpStatusMsg.style.color = 'var(--neon-yellow)';
+      } else if (status === 'no') {
+        DOM.rsvpStatusMsg.textContent = `😢 We'll miss you, ${STATE.currentStudentName}! If plans change, feel free to update your RSVP anytime.`;
+        DOM.rsvpStatusMsg.style.color = 'var(--text-muted)';
+      }
+    }
+
+    function loadSavedRsvp() {
+      if (!STATE.currentUsn) return;
+      const saved = localStorage.getItem(`rsvp_${STATE.currentUsn}`);
+      if (saved) {
+        applyRsvpUI(saved, false);
+      } else {
+        DOM.rsvpButtons.forEach(b => {
+          b.classList.remove('selected', 'selected-yes');
+          b.setAttribute('aria-checked', 'false');
+        });
+        DOM.rsvpStatusMsg.textContent = '';
+      }
+
+      // Check saved song
+      const savedSong = localStorage.getItem(`song_${STATE.currentUsn}`);
+      if (savedSong) {
+        DOM.songInput.value = savedSong;
+        DOM.songFeedback.style.display = 'block';
+        DOM.songFeedback.style.color = '#10b981';
+        DOM.songFeedback.textContent = `🎧 Request recorded: "${savedSong}". Our DJ is queuing it up!`;
+      } else {
+        DOM.songInput.value = '';
+        DOM.songFeedback.style.display = 'none';
+      }
+    }
+
+    function handleSongSubmit() {
+      const song = DOM.songInput.value.trim();
+      if (!song) {
+        DOM.songFeedback.style.display = 'block';
+        DOM.songFeedback.style.color = '#f87171';
+        DOM.songFeedback.textContent = 'Please enter a song name or artist!';
+        return;
+      }
+
+      if (STATE.currentUsn) {
+        localStorage.setItem(`song_${STATE.currentUsn}`, song);
+      }
+
+      DOM.songFeedback.style.display = 'block';
+      DOM.songFeedback.style.color = '#10b981';
+      DOM.songFeedback.textContent = `🎶 Hell yeah! "${song}" added to the party playlist!`;
+      triggerConfetti(1);
+    }
+
+
+    /**
+     * ==========================================================================
+     * 8. DOWNLOAD FRESHERS PASS (html2canvas to PNG)
+     * ==========================================================================
+     */
+    async function downloadTicketPass() {
+      const originalText = DOM.downloadPassBtn.innerHTML;
+      DOM.downloadPassBtn.innerHTML = '<span>⏳ Generating Ticket PNG...</span>';
+      DOM.downloadPassBtn.disabled = true;
+
+      try {
+        // html2canvas renders the ticket node
+        const ticketNode = DOM.passCard;
+        const canvas = await html2canvas(ticketNode, {
+          scale: 2.5, // High DPI resolution for crisp output
+          useCORS: true,
+          backgroundColor: null,
+          logging: false
+        });
+
+        // Convert canvas to downloadable blob / URL
+        const imageUri = canvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        const studentSlug = (STATE.currentStudentName || 'Fresher').replace(/\s+/g, '_');
+        link.download = `Freshers2026_Pass_${STATE.currentUsn || 'VIP'}_${studentSlug}.png`;
+        link.href = imageUri;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        DOM.downloadPassBtn.innerHTML = '<span>✅ Pass Downloaded!</span>';
+        triggerConfetti(1.5);
+
+        setTimeout(() => {
+          DOM.downloadPassBtn.innerHTML = originalText;
+          DOM.downloadPassBtn.disabled = false;
+        }, 2500);
+
+      } catch (err) {
+        console.error("Pass generation error:", err);
+        alert("Could not generate image automatically. You can take a screenshot of your pass instead!");
+        DOM.downloadPassBtn.innerHTML = originalText;
+        DOM.downloadPassBtn.disabled = false;
+      }
+    }
+
+
+    /**
+     * ==========================================================================
+     * 9. COUNTDOWN TIMER
+     * ==========================================================================
+     */
+    function initCountdown() {
+      const targetTime = new Date(EVENT_CONFIG.targetDate).getTime();
+
+      function updateClock() {
+        const now = new Date().getTime();
+        const diff = targetTime - now;
+
+        if (diff <= 0) {
+          DOM.cdDays.textContent = '00';
+          DOM.cdHours.textContent = '00';
+          DOM.cdMinutes.textContent = '00';
+          DOM.cdSeconds.textContent = '00';
+          clearInterval(STATE.countdownInterval);
+          return;
+        }
+
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+        DOM.cdDays.textContent = String(days).padStart(2, '0');
+        DOM.cdHours.textContent = String(hours).padStart(2, '0');
+        DOM.cdMinutes.textContent = String(minutes).padStart(2, '0');
+        DOM.cdSeconds.textContent = String(seconds).padStart(2, '0');
+      }
+
+      updateClock();
+      STATE.countdownInterval = setInterval(updateClock, 1000);
+    }
+
+
+    /**
+     * ==========================================================================
+     * 10. THEME MANAGEMENT (Dark / Light)
+     * ==========================================================================
+     */
+    function initTheme() {
+      const savedTheme = localStorage.getItem('freshers_theme') || 'dark';
+      applyTheme(savedTheme);
+    }
+
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme') || 'dark';
+      const nextTheme = current === 'dark' ? 'light' : 'dark';
+      applyTheme(nextTheme);
+    }
+
+    function applyTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem('freshers_theme', theme);
+      DOM.themeToggle.textContent = theme === 'dark' ? '☀️' : '🌙';
+      DOM.themeToggle.title = `Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`;
+    }
+
+
+    /**
+     * ==========================================================================
+     * 11. CONFETTI EFFECT
+     * ==========================================================================
+     */
+    function triggerConfetti(seconds) {
+      if (typeof confetti !== 'function') return;
+
+      const duration = (seconds || 2) * 1000;
+      const animationEnd = Date.now() + duration;
+      const colors = ['#06b6d4', '#a855f7', '#ec4899', '#eab308', '#ffffff'];
+
+      (function frame() {
+        confetti({
+          particleCount: 4,
+          angle: 60,
+          spread: 55,
+          origin: { x: 0, y: 0.7 },
+          colors: colors
+        });
+        confetti({
+          particleCount: 4,
+          angle: 120,
+          spread: 55,
+          origin: { x: 1, y: 0.7 },
+          colors: colors
+        });
+
+        if (Date.now() < animationEnd) {
+          requestAnimationFrame(frame);
+        }
+      }());
+    }
+
+
+    /**
+     * ==========================================================================
+     * 12. EVENT LISTENERS SETUP
+     * ==========================================================================
+     */
+    function setupEventListeners() {
+      // Login form
+      DOM.loginForm.addEventListener('submit', handleLoginSubmit);
+
+      // Auto uppercase USN input as user types
+      DOM.usnInput.addEventListener('input', (e) => {
+        const start = e.target.selectionStart;
+        const end = e.target.selectionEnd;
+        e.target.value = e.target.value.toUpperCase();
+        e.target.setSelectionRange(start, end);
+        hideLoginError();
+      });
+
+      // Welcome Modal Proceed
+      DOM.enterPortalBtn.addEventListener('click', showAppView);
+
+      // Top Nav Logout
+      DOM.logoutBtn.addEventListener('click', logoutUser);
+
+      // Theme toggle
+      DOM.themeToggle.addEventListener('click', toggleTheme);
+
+      // RSVP Buttons
+      DOM.rsvpButtons.forEach(btn => {
+        btn.addEventListener('click', () => handleRsvpClick(btn));
+      });
+
+      // Song Request Submit
+      DOM.songSubmitBtn.addEventListener('click', handleSongSubmit);
+      DOM.songInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') handleSongSubmit();
+      });
+
+      // Download Ticket Pass
+      DOM.downloadPassBtn.addEventListener('click', downloadTicketPass);
+
+      // Back to top floating button
+      window.addEventListener('scroll', () => {
+        if (window.scrollY > 400) {
+          DOM.backToTop.classList.add('visible');
+        } else {
+          DOM.backToTop.classList.remove('visible');
+        }
+      });
+
+      DOM.backToTop.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    }
+
+
+    /**
+     * Utility: Basic HTML escape to prevent XSS
+     */
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+
+    // Kickstart app on load
+    document.addEventListener('DOMContentLoaded', initApp);
+  </script>
+</body>
+</html>
