@@ -1,6 +1,6 @@
 # Freshers 2026: Level 1 Unlocked — Full-Stack Invitation
 
-A complete full-stack Freshers' Party invitation website with backend API, SQLite database, and admin dashboard.
+A complete full-stack Freshers' Party invitation website with backend API, Supabase Cloud PostgreSQL database, and admin dashboard.
 
 ## 🚀 Quick Start (Local)
 
@@ -22,27 +22,30 @@ Then open:
 ## 📁 Project Structure
 
 ```
-├── server.js              # Express backend server (routes + middleware)
+├── server.js               # Express backend server (routes + middleware)
 ├── db/
-│   └── database.js        # SQLite schema, seeds, and query helpers
-│   └── freshers.db        # Auto-created SQLite database (gitignored)
+│   ├── database.js         # Multi-engine DB layer (Supabase Cloud + Postgres + SQLite fallback)
+│   ├── supabase_schema.sql # Supabase PostgreSQL SQL schema
+│   └── freshers.db         # Local SQLite database (offline fallback, gitignored)
 ├── public/
-│   ├── index.html          # Main invitation frontend (API-backed)
-│   └── admin.html          # Admin dashboard
-├── .env                    # Environment variables (gitignored)
-├── .env.example            # Template for environment variables
+│   ├── index.html           # Main invitation frontend (API-backed)
+│   └── admin.html           # Admin dashboard
+├── .env                     # Environment variables (Supabase URL & key, secrets)
+├── .env.example             # Template for environment variables
 ├── package.json
 └── .gitignore
 ```
 
 ## 🔧 Configuration
 
-### Event Details & Student List
-Edit the seed data in **`db/database.js`**:
-- Search for `🎯 PASTE YOUR REAL STUDENT LIST HERE` to add students
-- Search for `🎯 EDIT YOUR EVENT DETAILS HERE` to change event config
-
-> **Note:** The database is seeded once on first run. To re-seed, delete `db/freshers.db` and restart.
+### Database Setup (Supabase)
+The database is hosted on **Supabase** with cloud persistence across all deployments.
+Configuration in `.env`:
+```env
+SUPABASE_URL=https://rcvhfferpcwjirhvmxgv.supabase.co
+SUPABASE_ANON_KEY=your-supabase-anon-key
+```
+If `SUPABASE_URL` is omitted, the app gracefully falls back to local SQLite (`db/freshers.db`).
 
 ### Environment Variables
 Copy `.env.example` to `.env` and customize:
@@ -52,6 +55,9 @@ Copy `.env.example` to `.env` and customize:
 | `PORT` | Server port | `3000` |
 | `JWT_SECRET` | JWT signing key (change in production!) | `freshers2026-...` |
 | `ADMIN_PASSWORD` | Admin dashboard password | `admin2026` |
+| `SUPABASE_URL` | Supabase project URL | Connected Supabase URL |
+| `SUPABASE_ANON_KEY` | Supabase Anon Key | Connected Supabase Key |
+
 
 ## 🌐 API Endpoints
 

@@ -3,7 +3,7 @@
  * FRESHERS 2026 — Express Backend Server
  * ==========================================================================
  * Handles: USN authentication, RSVP management, song requests, admin panel.
- * Database: SQLite via better-sqlite3 (file-based, zero-config).
+ * Database: Supabase PostgreSQL (Cloud) with fallback to SQLite (Local).
  * 
  * Run:   node server.js
  * Dev:   npm run dev
@@ -84,58 +84,70 @@ function requireAdmin(req, res, next) {
  * Body: { usn: "1XX22CS001" }
  * Looks up student in DB, returns JWT + student data.
  */
-app.post('/api/auth/login', (req, res) => {
-  let { usn } = req.body;
-  if (!usn) return res.status(400).json({ error: 'USN is required' });
+app.post('/api/auth/login', async (req, res, next) => {
+  try {
+    let { usn } = req.body;
+    if (!usn) return res.status(400).json({ error: 'USN is required' });
 
-  usn = usn.trim().toUpperCase();
+    usn = usn.trim().toUpperCase();
 
-  // Validate format (alphanumeric, 5-15 chars)
-  if (!/^[A-Z0-9]{5,15}$/.test(usn)) {
-    return res.status(400).json({ error: 'Invalid USN format. Letters and digits only, 5-15 characters.' });
-  }
+    // Validate format (alphanumeric, 5-15 chars)
+    if (!/^[A-Z0-9]{5,15}$/.test(usn)) {
+      return res.status(400).json({ error: 'Invalid USN format. Letters and digits only, 5-15 characters.' });
+    }
 
-  const student = db.getStudentByUSN(usn);
-  if (!student) {
-    return res.status(404).json({
-      error: `USN "${usn}" not found in the guest list. Please contact your senior coordinator to be added.`
+    const student = await db.getStudentByUSN(usn);
+    if (!student) {
+      return res.status(404).json({
+        error: `USN "${usn}" not found in the guest list. Please contact your senior coordinator to be added.`
+      });
+    }
+
+    const token = generateToken({ usn: student.usn, name: student.name, role: 'student' });
+
+    // Fetch existing RSVP & song for this student
+    const [rsvp, song] = await Promise.all([
+      db.getRsvpByUSN(usn),
+      db.getSongByUSN(usn)
+    ]);
+
+    res.json({
+      success: true,
+      token,
+      student: {
+        usn: student.usn,
+        name: student.name
+      },
+      rsvp: rsvp ? rsvp.status : null,
+      song: song ? song.song_name : null
     });
+  } catch (err) {
+    next(err);
   }
-
-  const token = generateToken({ usn: student.usn, name: student.name, role: 'student' });
-
-  // Fetch existing RSVP & song for this student
-  const rsvp = db.getRsvpByUSN(usn);
-  const song = db.getSongByUSN(usn);
-
-  res.json({
-    success: true,
-    token,
-    student: {
-      usn: student.usn,
-      name: student.name
-    },
-    rsvp: rsvp ? rsvp.status : null,
-    song: song ? song.song_name : null
-  });
 });
 
 /**
  * GET /api/auth/me
  * Returns current logged-in student's profile + saved RSVP & song.
  */
-app.get('/api/auth/me', requireAuth, (req, res) => {
-  const student = db.getStudentByUSN(req.user.usn);
-  if (!student) return res.status(404).json({ error: 'Student not found' });
+app.get('/api/auth/me', requireAuth, async (req, res, next) => {
+  try {
+    const student = await db.getStudentByUSN(req.user.usn);
+    if (!student) return res.status(404).json({ error: 'Student not found' });
 
-  const rsvp = db.getRsvpByUSN(req.user.usn);
-  const song = db.getSongByUSN(req.user.usn);
+    const [rsvp, song] = await Promise.all([
+      db.getRsvpByUSN(req.user.usn),
+      db.getSongByUSN(req.user.usn)
+    ]);
 
-  res.json({
-    student: { usn: student.usn, name: student.name },
-    rsvp: rsvp ? rsvp.status : null,
-    song: song ? song.song_name : null
-  });
+    res.json({
+      student: { usn: student.usn, name: student.name },
+      rsvp: rsvp ? rsvp.status : null,
+      song: song ? song.song_name : null
+    });
+  } catch (err) {
+    next(err);
+  }
 });
 
 /**
@@ -143,14 +155,18 @@ app.get('/api/auth/me', requireAuth, (req, res) => {
  * Body: { status: "yes" | "maybe" | "no" }
  * Creates or updates an RSVP for the logged-in student.
  */
-app.post('/api/rsvp', requireAuth, (req, res) => {
-  const { status } = req.body;
-  if (!status || !['yes', 'maybe', 'no'].includes(status)) {
-    return res.status(400).json({ error: 'Status must be "yes", "maybe", or "no".' });
-  }
+app.post('/api/rsvp', requireAuth, async (req, res, next) => {
+  try {
+    const { status } = req.body;
+    if (!status || !['yes', 'maybe', 'no'].includes(status)) {
+      return res.status(400).json({ error: 'Status must be "yes", "maybe", or "no".' });
+    }
 
-  db.upsertRsvp(req.user.usn, req.user.name, status);
-  res.json({ success: true, status });
+    await db.upsertRsvp(req.user.usn, req.user.name, status);
+    res.json({ success: true, status });
+  } catch (err) {
+    next(err);
+  }
 });
 
 /**
@@ -158,33 +174,45 @@ app.post('/api/rsvp', requireAuth, (req, res) => {
  * Body: { song: "Song Name - Artist" }
  * Saves or updates a song request for the logged-in student.
  */
-app.post('/api/song', requireAuth, (req, res) => {
-  const { song } = req.body;
-  if (!song || !song.trim()) {
-    return res.status(400).json({ error: 'Song name is required.' });
-  }
+app.post('/api/song', requireAuth, async (req, res, next) => {
+  try {
+    const { song } = req.body;
+    if (!song || !song.trim()) {
+      return res.status(400).json({ error: 'Song name is required.' });
+    }
 
-  const trimmed = song.trim().slice(0, 200);
-  db.upsertSong(req.user.usn, req.user.name, trimmed);
-  res.json({ success: true, song: trimmed });
+    const trimmed = song.trim().slice(0, 200);
+    await db.upsertSong(req.user.usn, req.user.name, trimmed);
+    res.json({ success: true, song: trimmed });
+  } catch (err) {
+    next(err);
+  }
 });
 
 /**
  * GET /api/event
  * Returns public event configuration (no auth needed).
  */
-app.get('/api/event', (req, res) => {
-  const config = db.getEventConfig();
-  res.json(config);
+app.get('/api/event', async (req, res, next) => {
+  try {
+    const config = await db.getEventConfig();
+    res.json(config);
+  } catch (err) {
+    next(err);
+  }
 });
 
 /**
  * GET /api/students/sample
  * Returns 5 sample USNs for the login page demo chips (no auth needed).
  */
-app.get('/api/students/sample', (req, res) => {
-  const samples = db.getSampleUSNs(5);
-  res.json(samples);
+app.get('/api/students/sample', async (req, res, next) => {
+  try {
+    const samples = await db.getSampleUSNs(5);
+    res.json(samples);
+  } catch (err) {
+    next(err);
+  }
 });
 
 
@@ -212,13 +240,19 @@ app.post('/api/admin/login', (req, res) => {
  * GET /api/admin/dashboard
  * Returns full overview: counts, RSVP list, song requests.
  */
-app.get('/api/admin/dashboard', requireAdmin, (req, res) => {
-  const stats = db.getDashboardStats();
-  const rsvps = db.getAllRsvps();
-  const songs = db.getAllSongs();
-  const students = db.getAllStudents();
+app.get('/api/admin/dashboard', requireAdmin, async (req, res, next) => {
+  try {
+    const [stats, rsvps, songs, students] = await Promise.all([
+      db.getDashboardStats(),
+      db.getAllRsvps(),
+      db.getAllSongs(),
+      db.getAllStudents()
+    ]);
 
-  res.json({ stats, rsvps, songs, students });
+    res.json({ stats, rsvps, songs, students });
+  } catch (err) {
+    next(err);
+  }
 });
 
 /**
@@ -226,7 +260,7 @@ app.get('/api/admin/dashboard', requireAdmin, (req, res) => {
  * Body: { usn: "1XX22CS011", name: "New Student" }
  * Add a student to the database.
  */
-app.post('/api/admin/students', requireAdmin, (req, res) => {
+app.post('/api/admin/students', requireAdmin, async (req, res, next) => {
   let { usn, name } = req.body;
   if (!usn || !name) return res.status(400).json({ error: 'USN and name required' });
 
@@ -238,13 +272,13 @@ app.post('/api/admin/students', requireAdmin, (req, res) => {
   }
 
   try {
-    db.addStudent(usn, name);
+    await db.addStudent(usn, name);
     res.json({ success: true, student: { usn, name } });
   } catch (err) {
-    if (err.message.includes('UNIQUE')) {
+    if (err.code === '23505' || err.code === 'SQLITE_CONSTRAINT_PRIMARYKEY' || (err.message && err.message.includes('UNIQUE'))) {
       return res.status(409).json({ error: 'USN already exists in database' });
     }
-    throw err;
+    next(err);
   }
 });
 
@@ -253,7 +287,7 @@ app.post('/api/admin/students', requireAdmin, (req, res) => {
  * Body: { students: [{ usn: "...", name: "..." }, ...] }
  * Bulk-add students (skips duplicates).
  */
-app.post('/api/admin/students/bulk', requireAdmin, (req, res) => {
+app.post('/api/admin/students/bulk', requireAdmin, async (req, res, next) => {
   const { students } = req.body;
   if (!Array.isArray(students)) {
     return res.status(400).json({ error: 'students must be an array' });
@@ -268,10 +302,15 @@ app.post('/api/admin/students/bulk', requireAdmin, (req, res) => {
       continue;
     }
     try {
-      db.addStudent(s.usn.trim().toUpperCase(), s.name.trim());
+      await db.addStudent(s.usn.trim().toUpperCase(), s.name.trim());
       results.added++;
     } catch (err) {
-      results.skipped++;
+      if (err.code === '23505' || err.code === 'SQLITE_CONSTRAINT_PRIMARYKEY' || (err.message && err.message.includes('UNIQUE'))) {
+        results.skipped++;
+      } else {
+        results.errors.push(`Error for ${s.usn}: ${err.message}`);
+        results.skipped++;
+      }
     }
   }
 
@@ -282,53 +321,85 @@ app.post('/api/admin/students/bulk', requireAdmin, (req, res) => {
  * DELETE /api/admin/students/:usn
  * Remove a student by USN.
  */
-app.delete('/api/admin/students/:usn', requireAdmin, (req, res) => {
-  const usn = req.params.usn.trim().toUpperCase();
-  db.deleteStudent(usn);
-  res.json({ success: true });
+app.delete('/api/admin/students/:usn', requireAdmin, async (req, res, next) => {
+  try {
+    const usn = req.params.usn.trim().toUpperCase();
+    await db.deleteStudent(usn);
+    res.json({ success: true });
+  } catch (err) {
+    next(err);
+  }
 });
 
 /**
  * GET /api/admin/export/csv
  * Export all RSVPs as a downloadable CSV.
  */
-app.get('/api/admin/export/csv', requireAdmin, (req, res) => {
-  const rsvps = db.getAllRsvps();
-  const songs = db.getAllSongs();
+app.get('/api/admin/export/csv', requireAdmin, async (req, res, next) => {
+  try {
+    const [rsvps, songs] = await Promise.all([
+      db.getAllRsvps(),
+      db.getAllSongs()
+    ]);
 
-  // Build song lookup
-  const songMap = {};
-  songs.forEach(s => { songMap[s.usn] = s.song_name; });
+    // Build song lookup
+    const songMap = {};
+    songs.forEach(s => { songMap[s.usn] = s.song_name; });
 
-  let csv = 'USN,Name,RSVP Status,Song Request,Responded At\n';
-  rsvps.forEach(r => {
-    const song = songMap[r.usn] || '';
-    csv += `"${r.usn}","${r.student_name}","${r.status}","${song}","${r.updated_at}"\n`;
-  });
+    let csv = 'USN,Name,RSVP Status,Song Request,Responded At\n';
+    rsvps.forEach(r => {
+      const song = songMap[r.usn] || '';
+      const updatedStr = r.updated_at instanceof Date ? r.updated_at.toISOString() : (r.updated_at || '');
+      csv += `"${r.usn}","${r.student_name}","${r.status}","${song}","${updatedStr}"\n`;
+    });
 
-  res.setHeader('Content-Type', 'text/csv');
-  res.setHeader('Content-Disposition', 'attachment; filename=freshers2026_rsvps.csv');
-  res.send(csv);
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', 'attachment; filename=rythm2026_rsvps.csv');
+    res.send(csv);
+  } catch (err) {
+    next(err);
+  }
 });
 
 // ---------------------------------------------------------------------------
-// Serve the admin dashboard page
+// Static View Routes
 // ---------------------------------------------------------------------------
 app.get('/admin', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
 // Catch-all: serve the main invitation page (Express 5 compatible fallback)
-app.use((req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+app.use((req, res, next) => {
+  if (req.method === 'GET' && !req.path.startsWith('/api/')) {
+    return res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  }
+  next();
 });
 
 // ---------------------------------------------------------------------------
-// Start
+// Error Handling Middleware
 // ---------------------------------------------------------------------------
-app.listen(PORT, () => {
-  console.log(`\n🎮 Freshers 2026 Server is live!`);
-  console.log(`   🌐 Invitation:  http://localhost:${PORT}`);
-  console.log(`   🔑 Admin Panel: http://localhost:${PORT}/admin`);
-  console.log(`   📦 Database:    ./db/freshers.db\n`);
+app.use((err, req, res, next) => {
+  console.error('❌ Server Error:', err);
+  res.status(500).json({
+    error: 'Internal server error',
+    message: process.env.NODE_ENV === 'production' ? undefined : err.message
+  });
 });
+
+// ---------------------------------------------------------------------------
+// Initialize Database and Start Server
+// ---------------------------------------------------------------------------
+db.initDb()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`\n🎮 RYTHM 2026 (SPECTRA Association — Artificial Intelligence Branch) Server is live!`);
+      console.log(`   🌐 Invitation:  http://localhost:${PORT}`);
+      console.log(`   🔑 Admin Panel: http://localhost:${PORT}/admin`);
+      console.log(`   📦 Database:    ${db.getEngineName()}\n`);
+    });
+  })
+  .catch((err) => {
+    console.error('❌ Failed to initialize database:', err);
+    process.exit(1);
+  });
