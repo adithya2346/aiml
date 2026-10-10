@@ -1,11 +1,11 @@
 {
   "name": "freshers-2026-invitation",
   "version": "1.0.0",
-  "description": "Freshers 2026 Party Invitation — Full-stack Node.js + SQLite",
+  "description": "Freshers 2026 Party Invitation — Full-stack Node.js + Supabase",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node --watch server.js"
+    "dev": "node --watch-path=server.js --watch-path=db/database.js --watch-path=public/index.html server.js"
   },
   "keywords": [
     "freshers",
@@ -18,11 +18,14 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.117.3",
     "bcryptjs": "^3.0.3",
-    "better-sqlite3": "^13.0.3",
     "cors": "^2.8.6",
     "dotenv": "^18.0.6",
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
-    "pg": "^8.23.1"
+    "pg": "^8.23.1",
+    "serverless-http": "^4.0.0"
+  },
+  "optionalDependencies": {
+    "better-sqlite3": "^13.0.3"
   }
 }

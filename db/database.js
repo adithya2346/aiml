@@ -22,7 +22,7 @@ const fs = require('fs');
 
 // Check credentials
 const SUPABASE_URL = process.env.SUPABASE_URL || '';
-const SUPABASE_KEY = process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY || process.env.SUPABASE_ANON_KEY || '';
 const useSupabaseClient = Boolean(SUPABASE_URL.trim() && SUPABASE_KEY.trim());
 
 const DB_URL = process.env.DATABASE_URL || process.env.POSTGRES_URL || process.env.SUPABASE_DB_URL || '';
@@ -45,7 +45,7 @@ const DEFAULT_STUDENTS = [
 ];
 
 const DEFAULT_CONFIG = {
-  name: 'RYTHM: Freshers 2026',
+  name: 'RYTAM: Freshers 2026',
   tagline: 'Organized by SPECTRA Association • Dept. of Artificial Intelligence and Machine Learning',
   targetDate: '2026-10-13T09:30:00',
   displayDate: '13 October 2026',
@@ -75,9 +75,9 @@ const DEFAULT_CONFIG = {
   ],
 
   faqs: [
-    { q: 'Who is eligible to attend RYTHM?', a: 'All newly admitted 1st year students of Artificial Intelligence and Machine Learning are warmly invited! Your USN grants you free access.' },
-    { q: 'Is there any entry fee or pass charge?', a: 'Zero! RYTHM is fully organized and hosted by SPECTRA Association and your seniors. There is absolutely no charge for entry, food, or activities.' },
-    { q: 'What should I wear for RYTHM?', a: 'Wear bright colours, neon accents, cyber chic, cool casuals, or smart party wear! Think sneakers, fun jackets, graphic tees, or vibrant party wear.' },
+    { q: 'Who is eligible to attend RYTAM?', a: 'All newly admitted 1st year students of Artificial Intelligence and Machine Learning are warmly invited! Your USN grants you free access.' },
+    { q: 'Is there any entry fee or pass charge?', a: 'Zero! RYTAM is fully organized and hosted by SPECTRA Association and your seniors. There is absolutely no charge for entry, food, or activities.' },
+    { q: 'What should I wear for RYTAM?', a: 'Wear bright colours, neon accents, cyber chic, cool casuals, or smart party wear! Think sneakers, fun jackets, graphic tees, or vibrant party wear.' },
     { q: 'Can I bring a friend or plus one from outside?', a: 'To ensure adequate capacity at Party Hall Room 332, entry is strictly restricted to AIML students whose USNs are in the official guest registry.' },
     { q: 'What do I need to bring at the entrance?', a: 'Just your digital pass (downloaded or on this website) and your physical College ID card (or admission slip).' }
   ]
@@ -122,11 +122,18 @@ let sqliteDb = null;
 let sqliteStmts = {};
 
 if (!useSupabaseClient && !isPostgres) {
-  const Database = require('better-sqlite3');
-  const DB_DIR = path.join(__dirname);
-  if (!fs.existsSync(DB_DIR)) {
-    fs.mkdirSync(DB_DIR, { recursive: true });
+  let Database = null;
+  try {
+    Database = require('better-sqlite3');
+  } catch (err) {
+    console.warn('⚠️ better-sqlite3 is not available in this environment (serverless).');
   }
+
+  if (Database) {
+    const DB_DIR = path.join(__dirname);
+    if (!fs.existsSync(DB_DIR)) {
+      fs.mkdirSync(DB_DIR, { recursive: true });
+    }
 
   const DB_PATH = path.join(DB_DIR, 'freshers.db');
   sqliteDb = new Database(DB_PATH);
@@ -195,6 +202,7 @@ if (!useSupabaseClient && !isPostgres) {
     studentTotal: sqliteDb.prepare('SELECT COUNT(*) as count FROM students'),
     songTotal: sqliteDb.prepare('SELECT COUNT(*) as count FROM songs'),
   };
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -320,6 +328,12 @@ async function initDb() {
   }
 
   // SQLite Fallback
+  if (!sqliteDb) {
+    console.warn('⚠️ No database connection active (Supabase credentials missing and SQLite unavailable).');
+    isInitialized = true;
+    return;
+  }
+
   const studentCount = sqliteDb.prepare('SELECT COUNT(*) as count FROM students').get().count;
   if (studentCount === 0) {
     console.log('📦 Seeding sample student database in SQLite...');
@@ -629,6 +643,24 @@ module.exports = {
       }
     });
     return config;
+  },
+
+  async updateEventConfig(key, value) {
+    const valStr = typeof value === 'object' ? JSON.stringify(value) : String(value);
+    if (supabaseClient) {
+      const { error } = await supabaseClient
+        .from('event_config')
+        .upsert({ key, value: valStr }, { onConflict: 'key' });
+      if (error) throw error;
+      return;
+    }
+    if (isPostgres) {
+      await pgPool.query('INSERT INTO event_config (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value', [key, valStr]);
+      return;
+    }
+    if (sqliteDb) {
+      sqliteDb.prepare('INSERT OR REPLACE INTO event_config (key, value) VALUES (?, ?)').run(key, valStr);
+    }
   },
 
   // -------------------------------------------------------------------------

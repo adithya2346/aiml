@@ -31,8 +31,27 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve static frontend files from /public
-app.use(express.static(path.join(__dirname, 'public')));
+// Serve static frontend files from /public (with no-cache for HTML so updates are instant)
+app.use(express.static(path.join(__dirname, 'public'), {
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith('.html')) {
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+    }
+  }
+}));
+
+// Ensure database is initialized for serverless environments (e.g. Vercel)
+app.use(async (req, res, next) => {
+  try {
+    await db.initDb();
+    next();
+  } catch (err) {
+    console.error('❌ Database initialization error:', err);
+    next(err);
+  }
+});
 
 // ---------------------------------------------------------------------------
 // JWT Helpers
@@ -86,21 +105,30 @@ function requireAdmin(req, res, next) {
  */
 app.post('/api/auth/login', async (req, res, next) => {
   try {
-    let { usn } = req.body;
+    let { usn, name } = req.body;
     if (!usn) return res.status(400).json({ error: 'USN is required' });
 
-    usn = usn.trim().toUpperCase();
+    // Sanitize: strip whitespace and hyphens, uppercase
+    usn = String(usn).replace(/[\s-]/g, '').trim().toUpperCase();
 
-    // Validate format (alphanumeric, 5-15 chars)
-    if (!/^[A-Z0-9]{5,15}$/.test(usn)) {
-      return res.status(400).json({ error: 'Invalid USN format. Letters and digits only, 5-15 characters.' });
+    // Validate format (alphanumeric, 4-20 chars)
+    if (!/^[A-Z0-9]{4,20}$/.test(usn)) {
+      return res.status(400).json({ error: 'Invalid USN format. Please enter a valid alphanumeric college USN (e.g. 1XX22CS001).' });
     }
 
-    const student = await db.getStudentByUSN(usn);
+    let student = await db.getStudentByUSN(usn);
     if (!student) {
-      return res.status(404).json({
-        error: `USN "${usn}" not found in the guest list. Please contact your senior coordinator to be added.`
-      });
+      // Auto-register so no valid fresher is blocked with an error!
+      const studentName = (name && name.trim()) ? name.trim() : `AIML Fresher (${usn.slice(-4) || usn})`;
+      try {
+        await db.addStudent(usn, studentName);
+        student = await db.getStudentByUSN(usn);
+      } catch (insertErr) {
+        student = await db.getStudentByUSN(usn);
+        if (!student) {
+          student = { usn, name: studentName };
+        }
+      }
     }
 
     const token = generateToken({ usn: student.usn, name: student.name, role: 'student' });
@@ -354,8 +382,62 @@ app.get('/api/admin/export/csv', requireAdmin, async (req, res, next) => {
     });
 
     res.setHeader('Content-Type', 'text/csv');
-    res.setHeader('Content-Disposition', 'attachment; filename=rythm2026_rsvps.csv');
+    res.setHeader('Content-Disposition', 'attachment; filename=rytam2026_rsvps.csv');
     res.send(csv);
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
+ * GET /api/admin/faqs
+ * Returns current FAQs from database for admin management.
+ */
+app.get('/api/admin/faqs', requireAdmin, async (req, res, next) => {
+  try {
+    const config = await db.getEventConfig();
+    const defaultFaqs = [
+      { q: 'Who is eligible to attend RYTAM?', a: 'All newly admitted 1st year students of Artificial Intelligence and Machine Learning are warmly invited! Your USN grants you free VIP entry.' },
+      { q: 'Is there any entry fee or pass charge?', a: 'Zero! RYTAM is 100% free and hosted with love by SPECTRA Association and your seniors. There is absolutely no charge for entry, food, welcome kits, or DJ activities.' },
+      { q: 'What is the dress code for RYTAM?', a: 'Retro Arcade / Cyber Chic or Smart Party Wear! Wear bright colours, neon accents, cool casuals, jackets, sneakers, or stylish party wear.' },
+      { q: 'What do I need to bring at the entrance?', a: 'Just your digital VIP pass (downloaded as PNG or opened on your phone from this website) along with your physical College ID card (or admission slip).' },
+      { q: 'Will food and refreshments be provided?', a: 'Yes! A lavish buffet lunch, welcome drinks, snacks, and delicious desserts will be served for all attendees.' },
+      { q: 'Can I bring a friend or plus one from outside?', a: 'To ensure adequate capacity at Party Hall Room 332, entry is strictly restricted to AIML students whose USNs are in the official guest registry.' },
+      { q: 'What activities and events are planned?', a: 'Battle of the batches, talent showcase, icebreakers, senior flash mob, live DJ dance floor, Mr. & Ms. Fresher crowning ceremony, and exciting games with prizes!' },
+      { q: 'How do I request songs for the DJ?', a: 'Use the "Drop Your DJ Song Request" box right above this section on the invitation page! Your track will go straight to the resident DJ queue.' }
+    ];
+    const faqs = (Array.isArray(config.faqs) && config.faqs.length > 0) ? config.faqs : defaultFaqs;
+    res.json({ success: true, faqs });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
+ * PUT /api/admin/faqs
+ * Body: { faqs: [ { q: 'Question', a: 'Answer' }, ... ] }
+ * Save and alter relevant questions in event_config.
+ */
+app.put('/api/admin/faqs', requireAdmin, async (req, res, next) => {
+  try {
+    const { faqs } = req.body;
+    if (!Array.isArray(faqs)) {
+      return res.status(400).json({ error: 'faqs must be an array of questions' });
+    }
+
+    const cleaned = faqs
+      .map(item => ({
+        q: String(item.q || '').trim(),
+        a: String(item.a || '').trim()
+      }))
+      .filter(item => item.q.length > 0 || item.a.length > 0);
+
+    if (cleaned.length === 0) {
+      return res.status(400).json({ error: 'Please provide at least one valid question and answer' });
+    }
+
+    await db.updateEventConfig('faqs', cleaned);
+    res.json({ success: true, count: cleaned.length, faqs: cleaned });
   } catch (err) {
     next(err);
   }
@@ -388,18 +470,22 @@ app.use((err, req, res, next) => {
 });
 
 // ---------------------------------------------------------------------------
-// Initialize Database and Start Server
+// Initialize Database and Start Server (for standalone/local execution)
 // ---------------------------------------------------------------------------
-db.initDb()
-  .then(() => {
-    app.listen(PORT, () => {
-      console.log(`\n🎮 RYTHM 2026 (SPECTRA Association — Artificial Intelligence Branch) Server is live!`);
-      console.log(`   🌐 Invitation:  http://localhost:${PORT}`);
-      console.log(`   🔑 Admin Panel: http://localhost:${PORT}/admin`);
-      console.log(`   📦 Database:    ${db.getEngineName()}\n`);
+if (!process.env.VERCEL) {
+  db.initDb()
+    .then(() => {
+      app.listen(PORT, () => {
+        console.log(`\n🎮 RYTAM 2026 (SPECTRA Association — Artificial Intelligence Branch) Server is live!`);
+        console.log(`   🌐 Invitation:  http://localhost:${PORT}`);
+        console.log(`   🔑 Admin Panel: http://localhost:${PORT}/admin`);
+        console.log(`   📦 Database:    ${db.getEngineName()}\n`);
+      });
+    })
+    .catch((err) => {
+      console.error('❌ Failed to initialize database:', err);
+      process.exit(1);
     });
-  })
-  .catch((err) => {
-    console.error('❌ Failed to initialize database:', err);
-    process.exit(1);
-  });
+}
+
+module.exports = app;

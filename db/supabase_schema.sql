@@ -1,5 +1,5 @@
 -- =============================================================================
--- RYTHM 2026: SPECTRA Association — Freshers Party
+-- RYTAM 2026: SPECTRA Association — Freshers Party
 -- Supabase PostgreSQL Database Schema
 -- =============================================================================
 -- If you wish to run this manually:
@@ -66,7 +66,7 @@ ON CONFLICT (usn) DO NOTHING;
 -- Seed Default Event Configuration
 -- -----------------------------------------------------------------------------
 INSERT INTO public.event_config (key, value) VALUES
-  ('name', '"RYTHM: Freshers 2026"'),
+  ('name', '"RYTAM: Freshers 2026"'),
   ('tagline', '"Organized by SPECTRA Association • Dept. of Artificial Intelligence and Machine Learning"'),
   ('targetDate', '"2026-10-13T09:30:00"'),
   ('displayDate', '"13 October 2026"'),
