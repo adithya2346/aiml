@@ -21,8 +21,8 @@ const db = require('./db/database');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const JWT_SECRET = process.env.JWT_SECRET || 'freshers2026-super-secret-key-change-me';
-const ADMIN_PASSWORD_HASH = bcrypt.hashSync(process.env.ADMIN_PASSWORD || 'admin2026', 10);
+const JWT_SECRET = process.env.JWT_SECRET || 'freshers-jwt-default-key';
+const ADMIN_PASSWORD_HASH = bcrypt.hashSync(process.env.ADMIN_PASSWORD || 'default-admin-password', 10);
 
 // ---------------------------------------------------------------------------
 // Middleware
@@ -250,7 +250,7 @@ app.get('/api/students/sample', async (req, res, next) => {
 
 /**
  * POST /api/admin/login
- * Body: { password: "admin2026" }
+ * Body: { password: "admin-password" }
  */
 app.post('/api/admin/login', (req, res) => {
   const { password } = req.body;

@@ -17,7 +17,7 @@ npm start
 
 Then open:
 - **Invitation site:** http://localhost:3000
-- **Admin dashboard:** http://localhost:3000/admin (password: `admin2026`)
+- **Admin dashboard:** http://localhost:3000/admin (password configured in `.env`)
 
 ## 📁 Project Structure
 
@@ -53,8 +53,8 @@ Copy `.env.example` to `.env` and customize:
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `PORT` | Server port | `3000` |
-| `JWT_SECRET` | JWT signing key (change in production!) | `freshers2026-...` |
-| `ADMIN_PASSWORD` | Admin dashboard password | `admin2026` |
+| `JWT_SECRET` | JWT signing key (change in production!) | `configured in .env` |
+| `ADMIN_PASSWORD` | Admin dashboard password | `configured in .env` |
 | `SUPABASE_URL` | Supabase project URL | Connected Supabase URL |
 | `SUPABASE_ANON_KEY` | Supabase Anon Key | Connected Supabase Key |
 

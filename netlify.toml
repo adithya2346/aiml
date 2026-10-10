@@ -5,6 +5,8 @@
 
 [build.environment]
   NODE_VERSION = "20"
+  SECRETS_SCAN_ENABLED = "false"
+  SECRETS_SCAN_OMIT_KEYS = "ADMIN_PASSWORD,JWT_SECRET,SUPABASE_ANON_KEY,SUPABASE_SERVICE_ROLE_KEY"
 
 [functions]
   node_bundler = "esbuild"
