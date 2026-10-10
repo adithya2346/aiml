@@ -1,3 +1,7 @@
+if (typeof globalThis.WebSocket === 'undefined') {
+  globalThis.WebSocket = class MockWebSocket {};
+}
+
 process.env.NETLIFY = 'true';
 const serverless = require('serverless-http');
 const app = require('../../server');
