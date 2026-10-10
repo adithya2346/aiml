@@ -2555,7 +2555,7 @@ const htmlContent = `<!DOCTYPE html>
       const fallbackTeam = [
         { name: 'Adithya CM', role: 'President', phone: '9036580418' },
         { name: 'V Srihari', role: 'Vice President', phone: '9380517743' },
-        { name: 'Nikil HL', role: 'Secretary', phone: '9113545908' },
+        { name: 'Nikhil HL', role: 'Secretary', phone: '9113545908' },
         { name: 'Likitha N', role: 'Joint Secretary', phone: '8660695730' }
       ];
 

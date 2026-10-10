@@ -64,7 +64,7 @@ const DEFAULT_CONFIG = {
   organizers: [
     { name: 'Adithya CM', phone: '9036580418', role: 'President' },
     { name: 'V Srihari', phone: '9380517743', role: 'Vice President' },
-    { name: 'Nikil HL', phone: '9113545908', role: 'Secretary' },
+    { name: 'Nikhil HL', phone: '9113545908', role: 'Secretary' },
     { name: 'Likitha N', phone: '8660695730', role: 'Joint Secretary' }
   ],
 
