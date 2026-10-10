@@ -472,7 +472,7 @@ app.use((err, req, res, next) => {
 // ---------------------------------------------------------------------------
 // Initialize Database and Start Server (for standalone/local execution)
 // ---------------------------------------------------------------------------
-if (!process.env.VERCEL) {
+if (!process.env.VERCEL && !process.env.NETLIFY && !process.env.AWS_LAMBDA_FUNCTION_NAME) {
   db.initDb()
     .then(() => {
       app.listen(PORT, () => {
