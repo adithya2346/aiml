@@ -5,6 +5,8 @@
 
 [build.environment]
   NODE_VERSION = "20"
+  # The Supabase anon key is public by design (protected by row-level security)
+  SECRETS_SCAN_OMIT_KEYS = "SUPABASE_ANON_KEY"
 
 [functions]
   node_bundler = "esbuild"
