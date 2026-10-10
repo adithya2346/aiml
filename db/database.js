@@ -121,12 +121,13 @@ if (isPostgres) {
 let sqliteDb = null;
 let sqliteStmts = {};
 
-if (!useSupabaseClient && !isPostgres) {
+if (!useSupabaseClient && !isPostgres && !process.env.NETLIFY && !process.env.VERCEL) {
   let Database = null;
   try {
-    Database = require('better-sqlite3');
+    const sqliteMod = 'better-sqlite3';
+    Database = require(sqliteMod);
   } catch (err) {
-    console.warn('⚠️ better-sqlite3 is not available in this environment (serverless).');
+    console.warn('⚠️ better-sqlite3 is not available in this environment.');
   }
 
   if (Database) {
