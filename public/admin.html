@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <style>
     :root {
       --bg: #0a0b12;
@@ -340,8 +341,8 @@
 
       <!-- Stats Overview -->
       <div class="stats-grid" id="stats-grid">
-        <div class="stat-card"><div class="stat-value cyan" id="stat-total">0</div><div class="stat-label">Total Students</div></div>
-        <div class="stat-card"><div class="stat-value purple" id="stat-responded">0</div><div class="stat-label">Responded</div></div>
+        <div class="stat-card" style="border-color: rgba(6, 182, 212, 0.45);"><div class="stat-value cyan" id="stat-attendance">0</div><div class="stat-label">Checked In 🎟️</div></div>
+        <div class="stat-card"><div class="stat-value purple" id="stat-total">0</div><div class="stat-label">Total Students</div></div>
         <div class="stat-card"><div class="stat-value green" id="stat-yes">0</div><div class="stat-label">Coming 🎉</div></div>
         <div class="stat-card"><div class="stat-value yellow" id="stat-maybe">0</div><div class="stat-label">Maybe 🤔</div></div>
         <div class="stat-card"><div class="stat-value red" id="stat-no">0</div><div class="stat-label">Can't Come 😢</div></div>
@@ -350,15 +351,87 @@
 
       <!-- Tabs -->
       <div class="tabs">
-        <button class="tab-btn active" data-tab="rsvps">📬 RSVPs</button>
+        <button class="tab-btn active" data-tab="attendance">📷 QR Scanner & Attendance</button>
+        <button class="tab-btn" data-tab="rsvps">📬 RSVPs</button>
         <button class="tab-btn" data-tab="songs">🎵 Song Requests</button>
         <button class="tab-btn" data-tab="students">👥 Student Registry</button>
         <button class="tab-btn" data-tab="manage">⚙️ Manage Students</button>
         <button class="tab-btn" data-tab="faqs">❓ Relevant Questions (FAQs)</button>
       </div>
 
+      <!-- Attendance & QR Gate Scanner Tab -->
+      <div class="tab-panel active" id="tab-attendance">
+        <!-- Live Scanner & Manual Input Card -->
+        <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.4rem; margin-bottom: 1.4rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.8rem; margin-bottom: 1rem;">
+            <div>
+              <h3 style="font-size: 1.25rem;">📷 Live QR Ticket Scanner & Gate Entry</h3>
+              <p style="font-size: 0.84rem; color: var(--text-sec);">
+                Scan student passes with your phone/laptop camera, upload a ticket screenshot, or type USN to take attendance.
+              </p>
+            </div>
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+              <button type="button" class="btn btn-primary btn-sm" id="btn-start-scanner">▶️ Start Camera</button>
+              <button type="button" class="btn btn-outline btn-sm" id="btn-stop-scanner" style="display: none;">⏹️ Stop Camera</button>
+              <label class="btn btn-outline btn-sm" style="cursor: pointer; margin-bottom: 0;">
+                📁 Upload Pass Image
+                <input type="file" id="qr-file-input" accept="image/*" style="display: none;">
+              </label>
+              <button type="button" class="btn btn-green btn-sm" id="export-attendance-btn">📥 Export Attendance CSV</button>
+            </div>
+          </div>
+
+          <!-- Camera Viewfinder container -->
+          <div id="scanner-wrapper" style="display: none; max-width: 440px; margin: 1rem auto 1.5rem auto; border-radius: 14px; overflow: hidden; border: 2px solid var(--cyan); background: #000; position: relative;">
+            <div id="qr-reader" style="width: 100%;"></div>
+            <div style="padding: 0.6rem; text-align: center; background: rgba(10, 11, 18, 0.95); font-size: 0.8rem; color: var(--cyan); font-weight: 600;">
+              🎯 Point camera at student's ticket QR code
+            </div>
+          </div>
+
+          <!-- Manual Entry / USB Barcode Scanner Bar -->
+          <form id="manual-scan-form" style="display: flex; gap: 0.6rem; flex-wrap: wrap; margin-top: 0.8rem;">
+            <input type="text" id="manual-scan-input" placeholder="Type or scan USN (e.g. 4GH25AI001) & press Enter..." style="flex: 1; min-width: 220px;" autocomplete="off">
+            <button type="submit" class="btn btn-primary" id="manual-scan-submit">Mark Present (Check In)</button>
+          </form>
+
+          <!-- Scan Result Feedback Alert Banner -->
+          <div id="scan-feedback" style="display: none; margin-top: 1.2rem; padding: 1.2rem; border-radius: 12px; transition: all 0.3s;"></div>
+        </div>
+
+        <!-- Attendance Registry Table & Search -->
+        <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.2rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.8rem; margin-bottom: 1rem;">
+            <h3 style="font-size: 1.05rem;">
+              📋 Admitted Students Registry (<span id="attendance-count-pill" style="color: var(--cyan);">0</span> checked in)
+            </h3>
+            <input type="text" id="attendance-search-input" placeholder="🔍 Search attendee by name or USN..." style="max-width: 260px; padding: 0.5rem 0.8rem; font-size: 0.85rem;">
+          </div>
+
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>USN</th>
+                  <th>Student Name</th>
+                  <th>Check-in Time</th>
+                  <th>Checked In By</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="attendance-table-body"></tbody>
+            </table>
+          </div>
+          <div class="empty-state" id="attendance-empty" style="display: none;">
+            No students checked in yet. Start scanning passes or use the search bar above!
+          </div>
+        </div>
+      </div>
+
       <!-- RSVP Tab -->
-      <div class="tab-panel active" id="tab-rsvps">
+      <div class="tab-panel" id="tab-rsvps">
         <div class="table-wrapper">
           <table>
             <thead><tr><th>#</th><th>USN</th><th>Name</th><th>Status</th><th>Last Updated</th></tr></thead>
@@ -546,6 +619,7 @@
       });
 
       await loadDashboardData();
+      checkUrlScanParam();
     }
 
 
@@ -564,6 +638,12 @@
         $('stat-maybe').textContent = stats.maybeCount;
         $('stat-no').textContent = stats.noCount;
         $('stat-songs').textContent = stats.totalSongRequests;
+        if ($('stat-attendance')) {
+          const admitted = data.attendance ? data.attendance.length : (stats.totalAdmitted || 0);
+          $('stat-attendance').textContent = `${admitted} / ${stats.totalStudents}`;
+        }
+
+        renderAttendanceTable(data.attendance || []);
 
         // RSVP Table
         const rsvpBody = $('rsvp-table-body');
@@ -652,12 +732,300 @@
         document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
         btn.classList.add('active');
         const tabName = btn.getAttribute('data-tab');
-        document.getElementById(`tab-${tabName}`).classList.add('active');
+        const panel = document.getElementById(`tab-${tabName}`);
+        if (panel) panel.classList.add('active');
         if (tabName === 'faqs') {
           loadFaqsData();
+        } else if (tabName !== 'attendance' && isScannerRunning) {
+          stopCameraScanner();
         }
       });
     });
+
+    /**
+     * =========================================================================
+     * QR CODE SCANNER & ATTENDANCE CONTROLLER
+     * =========================================================================
+     */
+    let html5QrCode = null;
+    let isScannerRunning = false;
+    let attendanceCache = [];
+
+    // Synthesizer for instant audible feedback
+    function playBeep(type = 'success') {
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        if (type === 'success') {
+          // Cheerful chime: 587Hz -> 880Hz
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.15);
+          gain.gain.setValueAtTime(0.25, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.35);
+        } else if (type === 'warning') {
+          // Double buzz: 330Hz
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(330, ctx.currentTime);
+          gain.gain.setValueAtTime(0.3, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.25);
+        } else {
+          // Error buzz: 160Hz
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(160, ctx.currentTime);
+          gain.gain.setValueAtTime(0.3, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.4);
+        }
+      } catch (_) {}
+    }
+
+    // Render Attendance Table
+    function renderAttendanceTable(list) {
+      attendanceCache = list || [];
+      const tbody = $('attendance-table-body');
+      const emptyEl = $('attendance-empty');
+      const countPill = $('attendance-count-pill');
+      
+      if (countPill) countPill.textContent = attendanceCache.length;
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      if (attendanceCache.length === 0) {
+        if (emptyEl) emptyEl.style.display = 'block';
+        return;
+      }
+      if (emptyEl) emptyEl.style.display = 'none';
+
+      const filter = ($('attendance-search-input')?.value || '').trim().toLowerCase();
+      const filtered = filter
+        ? attendanceCache.filter(item => item.usn.toLowerCase().includes(filter) || item.student_name.toLowerCase().includes(filter))
+        : attendanceCache;
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:1.5rem;">No matching attendees found.</td></tr>';
+        return;
+      }
+
+      filtered.forEach((item, idx) => {
+        const timeFormatted = item.checked_in_at ? new Date(item.checked_in_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '—';
+        tbody.innerHTML += `<tr>
+          <td>${idx + 1}</td>
+          <td><code>${esc(item.usn)}</code></td>
+          <td><strong>${esc(item.student_name)}</strong></td>
+          <td style="font-size:0.82rem;color:var(--cyan);font-weight:600;">${timeFormatted}</td>
+          <td style="font-size:0.8rem;color:var(--text-muted);">${esc(item.checked_in_by || 'Admin')}</td>
+          <td><span class="badge badge-yes">ADMITTED</span></td>
+          <td><button class="btn btn-danger btn-sm remove-attendance-btn" data-usn="${esc(item.usn)}" title="Undo check-in">Undo</button></td>
+        </tr>`;
+      });
+
+      // Attach remove/undo handlers
+      tbody.querySelectorAll('.remove-attendance-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const usn = btn.getAttribute('data-usn');
+          if (!confirm(`Undo check-in for USN ${usn}?`)) return;
+          try {
+            await ADMIN_API.del(`/api/admin/attendance/${encodeURIComponent(usn)}`);
+            showToast(`Removed check-in for ${usn}`, 'success');
+            await loadAttendanceData();
+          } catch (e) {
+            showToast('Failed to undo check-in', 'error');
+          }
+        });
+      });
+    }
+
+    async function loadAttendanceData() {
+      try {
+        const data = await ADMIN_API.get('/api/admin/attendance');
+        if (data && data.success) {
+          renderAttendanceTable(data.attendance);
+          if ($('stat-attendance')) {
+            $('stat-attendance').textContent = `${data.totalAdmitted || 0} / ${data.totalStudents || 0}`;
+          }
+        }
+      } catch (err) {
+        console.error('Error loading attendance:', err);
+      }
+    }
+
+    // Process check-in for a scanned or typed code
+    async function processCheckIn(rawCode) {
+      if (!rawCode || !rawCode.trim()) return;
+      const fb = $('scan-feedback');
+      fb.style.display = 'block';
+      fb.style.background = 'rgba(6, 182, 212, 0.15)';
+      fb.style.border = '1px solid var(--cyan)';
+      fb.innerHTML = `<strong>⏳ Verifying Pass...</strong> <span style="font-size:0.85rem;color:var(--text-sec);">${esc(rawCode)}</span>`;
+
+      try {
+        const { status, data } = await ADMIN_API.post('/api/admin/attendance/check-in', { code: rawCode });
+
+        if (status === 200 && data.success) {
+          if (data.alreadyAdmitted) {
+            // Already checked in
+            playBeep('warning');
+            fb.style.background = 'rgba(234, 179, 8, 0.2)';
+            fb.style.border = '1.5px solid var(--yellow)';
+            const timeStr = data.attendance?.checked_in_at ? new Date(data.attendance.checked_in_at).toLocaleTimeString() : '';
+            fb.innerHTML = `
+              <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.6rem;">
+                <div>
+                  <h4 style="color:var(--yellow);font-size:1.15rem;margin-bottom:0.2rem;">⚠️ ALREADY CHECKED IN</h4>
+                  <div style="font-size:1.05rem;font-weight:700;">${esc(data.student.name)} (<code>${esc(data.student.usn)}</code>)</div>
+                  <div style="font-size:0.83rem;color:var(--text-sec);">Admitted previously at ${timeStr}</div>
+                </div>
+                <span class="badge badge-maybe" style="font-size:0.85rem;padding:0.4rem 0.8rem;">DUPLICATE SCAN</span>
+              </div>
+            `;
+          } else {
+            // First time check in
+            playBeep('success');
+            fb.style.background = 'rgba(16, 185, 129, 0.25)';
+            fb.style.border = '1.5px solid var(--green)';
+            fb.innerHTML = `
+              <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.6rem;">
+                <div>
+                  <h4 style="color:var(--green);font-size:1.2rem;margin-bottom:0.2rem;">🎉 ENTRY GRANTED • ATTENDANCE MARKED</h4>
+                  <div style="font-size:1.25rem;font-weight:800;color:#fff;">${esc(data.student.name)}</div>
+                  <div style="font-size:0.88rem;color:var(--cyan);font-weight:600;">USN: <code>${esc(data.student.usn)}</code> • VIP LEVEL 1 GUEST</div>
+                </div>
+                <span class="badge badge-yes" style="font-size:0.88rem;padding:0.4rem 0.8rem;">ADMITTED</span>
+              </div>
+            `;
+            await loadAttendanceData();
+          }
+        } else {
+          // Error / Not found
+          playBeep('error');
+          fb.style.background = 'rgba(239, 68, 68, 0.2)';
+          fb.style.border = '1.5px solid var(--red)';
+          fb.innerHTML = `
+            <h4 style="color:var(--red);font-size:1.1rem;margin-bottom:0.2rem;">❌ ADMISSION REJECTED</h4>
+            <div style="font-size:0.9rem;color:#fca5a5;">${esc(data?.error || 'Student not recognized.')}</div>
+          `;
+        }
+      } catch (err) {
+        playBeep('error');
+        fb.style.background = 'rgba(239, 68, 68, 0.2)';
+        fb.style.border = '1.5px solid var(--red)';
+        fb.innerHTML = `<h4 style="color:var(--red);">Network / Server Error</h4>`;
+      }
+    }
+
+    // Camera Scanner Handlers
+    async function startCameraScanner() {
+      if (isScannerRunning) return;
+      const wrapper = $('scanner-wrapper');
+      wrapper.style.display = 'block';
+
+      try {
+        if (!html5QrCode) {
+          html5QrCode = new Html5Qrcode("qr-reader");
+        }
+
+        const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+
+        let lastScannedText = '';
+        let lastScanTime = 0;
+
+        await html5QrCode.start(
+          { facingMode: "environment" },
+          config,
+          (decodedText) => {
+            const now = Date.now();
+            if (decodedText === lastScannedText && now - lastScanTime < 3000) {
+              return; // Avoid multiple rapid triggers for the same pass
+            }
+            lastScannedText = decodedText;
+            lastScanTime = now;
+            processCheckIn(decodedText);
+          },
+          () => {} // Ignore scan frame failures
+        );
+
+        isScannerRunning = true;
+        $('btn-start-scanner').style.display = 'none';
+        $('btn-stop-scanner').style.display = 'inline-flex';
+      } catch (err) {
+        console.error("Camera access error:", err);
+        alert("Camera permission denied or camera not found. You can upload an image of the ticket or type the USN below!");
+        wrapper.style.display = 'none';
+      }
+    }
+
+    async function stopCameraScanner() {
+      if (!isScannerRunning || !html5QrCode) return;
+      try {
+        await html5QrCode.stop();
+        isScannerRunning = false;
+        $('scanner-wrapper').style.display = 'none';
+        $('btn-start-scanner').style.display = 'inline-flex';
+        $('btn-stop-scanner').style.display = 'none';
+      } catch (e) {
+        console.warn(e);
+      }
+    }
+
+    // Camera button listeners
+    $('btn-start-scanner').addEventListener('click', startCameraScanner);
+    $('btn-stop-scanner').addEventListener('click', stopCameraScanner);
+
+    // Image file upload scanner
+    $('qr-file-input').addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      try {
+        if (!html5QrCode) html5QrCode = new Html5Qrcode("qr-reader");
+        const decodedText = await html5QrCode.scanFile(file, true);
+        processCheckIn(decodedText);
+      } catch (err) {
+        alert("Could not detect a QR code in that image. Please try another screenshot or enter the USN manually.");
+      }
+      e.target.value = '';
+    });
+
+    // Manual input form listener
+    $('manual-scan-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const code = $('manual-scan-input').value.trim();
+      if (!code) return;
+      processCheckIn(code);
+      $('manual-scan-input').value = '';
+    });
+
+    // Attendance live search filter
+    $('attendance-search-input').addEventListener('input', () => {
+      renderAttendanceTable(attendanceCache);
+    });
+
+    // Export Attendance CSV button
+    $('export-attendance-btn').addEventListener('click', () => {
+      window.open('/api/admin/attendance/export/csv', '_blank');
+    });
+
+    // Handle auto-scan if URL contains ?scan=USN
+    function checkUrlScanParam() {
+      const params = new URLSearchParams(window.location.search);
+      const scanCode = params.get('scan') || params.get('usn');
+      if (scanCode) {
+        const tabBtn = document.querySelector('.tab-btn[data-tab="attendance"]');
+        if (tabBtn) tabBtn.click();
+        processCheckIn(scanCode);
+      }
+    }
 
 
     // Add Single Student

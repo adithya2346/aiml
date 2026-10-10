@@ -279,14 +279,15 @@ app.post('/api/admin/login', (req, res) => {
  */
 app.get('/api/admin/dashboard', requireAdmin, async (req, res, next) => {
   try {
-    const [stats, rsvps, songs, students] = await Promise.all([
+    const [stats, rsvps, songs, students, attendance] = await Promise.all([
       db.getDashboardStats(),
       db.getAllRsvps(),
       db.getAllSongs(),
-      db.getAllStudents()
+      db.getAllStudents(),
+      db.getAllAttendance()
     ]);
 
-    res.json({ stats, rsvps, songs, students });
+    res.json({ stats, rsvps, songs, students, attendance });
   } catch (err) {
     next(err);
   }
@@ -447,6 +448,160 @@ app.put('/api/admin/faqs', requireAdmin, async (req, res, next) => {
 
     await db.updateEventConfig('faqs', cleaned);
     res.json({ success: true, count: cleaned.length, faqs: cleaned });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ===========================================================================
+// ATTENDANCE & QR GATE SCANNER API
+// ===========================================================================
+
+function extractUsnFromScan(rawInput) {
+  if (!rawInput) return '';
+  let str = String(rawInput).trim();
+
+  // Try JSON
+  if (str.startsWith('{') && str.endsWith('}')) {
+    try {
+      const parsed = JSON.parse(str);
+      if (parsed.usn) return String(parsed.usn).replace(/[\s-]/g, '').toUpperCase();
+    } catch (_) {}
+  }
+
+  // Try URL parameter (e.g. ?scan=USN or ?usn=USN)
+  try {
+    if (str.includes('http://') || str.includes('https://') || str.includes('scan=') || str.includes('usn=')) {
+      const url = new URL(str, 'http://dummy.com');
+      const param = url.searchParams.get('scan') || url.searchParams.get('usn');
+      if (param) return param.replace(/[\s-]/g, '').toUpperCase();
+    }
+  } catch (_) {}
+
+  // Try colon prefix like RYTAM2026:CHECKIN:USN or RYTAM:USN
+  if (str.includes(':')) {
+    const parts = str.split(':');
+    return parts[parts.length - 1].replace(/[\s-]/g, '').toUpperCase();
+  }
+
+  return str.replace(/[\s-]/g, '').toUpperCase();
+}
+
+/**
+ * GET /api/admin/attendance
+ * Returns all check-in records and real-time attendance statistics.
+ */
+app.get('/api/admin/attendance', requireAdmin, async (req, res, next) => {
+  try {
+    const [attendanceList, students, stats] = await Promise.all([
+      db.getAllAttendance(),
+      db.getAllStudents(),
+      db.getDashboardStats()
+    ]);
+
+    res.json({
+      success: true,
+      attendance: attendanceList,
+      totalStudents: stats.totalStudents,
+      totalAdmitted: attendanceList.length,
+      pendingCount: Math.max(0, stats.totalStudents - attendanceList.length),
+      students
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
+ * POST /api/admin/attendance/check-in
+ * Scans and checks in a student by USN or raw scanned QR payload.
+ */
+app.post('/api/admin/attendance/check-in', requireAdmin, async (req, res, next) => {
+  try {
+    const rawCode = req.body.code || req.body.usn;
+    if (!rawCode) {
+      return res.status(400).json({ error: 'QR Code or USN is required' });
+    }
+
+    const usn = extractUsnFromScan(rawCode);
+    if (!usn || usn.length < 3) {
+      return res.status(400).json({ error: 'Invalid QR code or USN format' });
+    }
+
+    let student = await db.getStudentByUSN(usn);
+    if (!student) {
+      return res.status(404).json({
+        error: `USN "${usn}" is not registered in the student registry.`,
+        usn
+      });
+    }
+
+    // Check if already checked in
+    const existing = await db.getAttendanceByUSN(usn);
+    if (existing) {
+      const checkInDate = new Date(existing.checked_in_at);
+      const timeStr = !isNaN(checkInDate.getTime())
+        ? checkInDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        : 'earlier';
+      return res.json({
+        success: true,
+        alreadyAdmitted: true,
+        message: `⚠️ Student already checked in at ${timeStr}!`,
+        student,
+        attendance: existing
+      });
+    }
+
+    const record = await db.recordAttendance(
+      usn,
+      student.name,
+      req.admin?.role || 'Admin',
+      'admitted',
+      req.body.notes || ''
+    );
+
+    res.json({
+      success: true,
+      alreadyAdmitted: false,
+      message: `✅ Access Granted! Welcome ${student.name}!`,
+      student,
+      attendance: record
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
+ * DELETE /api/admin/attendance/:usn
+ * Undoes or deletes an attendance record.
+ */
+app.delete('/api/admin/attendance/:usn', requireAdmin, async (req, res, next) => {
+  try {
+    const usn = req.params.usn.trim().toUpperCase();
+    await db.deleteAttendance(usn);
+    res.json({ success: true, message: `Check-in record removed for ${usn}` });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
+ * GET /api/admin/attendance/export/csv
+ * Exports the live attendance sheet as CSV.
+ */
+app.get('/api/admin/attendance/export/csv', requireAdmin, async (req, res, next) => {
+  try {
+    const list = await db.getAllAttendance();
+    let csv = 'USN,Student Name,Check-in Time,Checked in By,Status,Notes\n';
+    list.forEach(a => {
+      const timeStr = a.checked_in_at instanceof Date ? a.checked_in_at.toISOString() : (a.checked_in_at || '');
+      csv += `"${a.usn}","${a.student_name}","${timeStr}","${a.checked_in_by || 'Admin'}","${a.entry_status || 'admitted'}","${a.notes || ''}"\n`;
+    });
+
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', 'attachment; filename=rytam2026_attendance.csv');
+    res.send(csv);
   } catch (err) {
     next(err);
   }

@@ -175,6 +175,16 @@ if (!useSupabaseClient && !isPostgres && !process.env.NETLIFY && !process.env.VE
       key   TEXT PRIMARY KEY NOT NULL,
       value TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS attendance (
+      usn           TEXT PRIMARY KEY NOT NULL,
+      student_name  TEXT NOT NULL,
+      checked_in_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      checked_in_by TEXT DEFAULT 'Admin',
+      entry_status  TEXT DEFAULT 'admitted',
+      notes         TEXT,
+      FOREIGN KEY (usn) REFERENCES students(usn) ON DELETE CASCADE
+    );
   `);
 
   sqliteStmts = {
@@ -195,6 +205,15 @@ if (!useSupabaseClient && !isPostgres && !process.env.NETLIFY && !process.env.VE
       ON CONFLICT(usn) DO UPDATE SET student_name = excluded.student_name, song_name = excluded.song_name, updated_at = CURRENT_TIMESTAMP
     `),
     allSongs: sqliteDb.prepare('SELECT * FROM songs ORDER BY updated_at DESC'),
+    getAttendance: sqliteDb.prepare('SELECT * FROM attendance WHERE usn = ?'),
+    addAttendance: sqliteDb.prepare(`
+      INSERT INTO attendance (usn, student_name, checked_in_by, entry_status, notes)
+      VALUES (?, ?, ?, ?, ?)
+      ON CONFLICT(usn) DO UPDATE SET student_name = excluded.student_name, entry_status = excluded.entry_status, notes = excluded.notes
+    `),
+    deleteAttendance: sqliteDb.prepare('DELETE FROM attendance WHERE usn = ?'),
+    allAttendance: sqliteDb.prepare('SELECT * FROM attendance ORDER BY checked_in_at DESC'),
+    attendanceTotal: sqliteDb.prepare('SELECT COUNT(*) as count FROM attendance'),
     getConfig: sqliteDb.prepare('SELECT key, value FROM event_config'),
     rsvpCounts: sqliteDb.prepare(`
       SELECT 
@@ -300,6 +319,15 @@ async function initDb() {
       CREATE TABLE IF NOT EXISTS event_config (
         key   TEXT PRIMARY KEY NOT NULL,
         value TEXT NOT NULL
+      );
+
+      CREATE TABLE IF NOT EXISTS attendance (
+        usn           TEXT PRIMARY KEY NOT NULL REFERENCES students(usn) ON DELETE CASCADE,
+        student_name  TEXT NOT NULL,
+        checked_in_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+        checked_in_by TEXT DEFAULT 'Admin',
+        entry_status  TEXT DEFAULT 'admitted',
+        notes         TEXT
       );
     `);
 
@@ -608,6 +636,203 @@ module.exports = {
   },
 
   // -------------------------------------------------------------------------
+  // Attendance & Gate Check-in
+  // -------------------------------------------------------------------------
+  async _getSupabaseConfigAttendance() {
+    try {
+      const cfg = await this.getEventConfig();
+      return Array.isArray(cfg.attendance_registry) ? cfg.attendance_registry : [];
+    } catch {
+      return [];
+    }
+  },
+
+  async _saveSupabaseConfigAttendance(list) {
+    await this.updateEventConfig('attendance_registry', list);
+  },
+
+  async getAttendanceByUSN(usn) {
+    if (supabaseClient) {
+      try {
+        const { data, error } = await supabaseClient
+          .from('attendance')
+          .select('*')
+          .eq('usn', usn)
+          .maybeSingle();
+        if (error) {
+          if (error.code === 'PGRST205' || (error.message && error.message.includes('attendance'))) {
+            const list = await this._getSupabaseConfigAttendance();
+            return list.find(a => a.usn === usn) || null;
+          }
+          throw error;
+        }
+        return data || null;
+      } catch (err) {
+        if (err.code === 'PGRST205' || (err.message && err.message.includes('attendance'))) {
+          const list = await this._getSupabaseConfigAttendance();
+          return list.find(a => a.usn === usn) || null;
+        }
+        throw err;
+      }
+    }
+    if (isPostgres) {
+      const res = await pgPool.query('SELECT * FROM attendance WHERE usn = $1', [usn]);
+      return res.rows[0] || null;
+    }
+    return sqliteStmts.getAttendance.get(usn) || null;
+  },
+
+  async recordAttendance(usn, name, checkedInBy = 'Admin', entryStatus = 'admitted', notes = '') {
+    const checkedInAt = new Date().toISOString();
+    if (supabaseClient) {
+      try {
+        const { data, error } = await supabaseClient
+          .from('attendance')
+          .upsert(
+            {
+              usn,
+              student_name: name,
+              checked_in_at: checkedInAt,
+              checked_in_by: checkedInBy,
+              entry_status: entryStatus,
+              notes
+            },
+            { onConflict: 'usn' }
+          )
+          .select()
+          .single();
+        if (error) {
+          if (error.code === 'PGRST205' || (error.message && error.message.includes('attendance'))) {
+            const list = await this._getSupabaseConfigAttendance();
+            const filtered = list.filter(a => a.usn !== usn);
+            const record = { usn, student_name: name, checked_in_at: checkedInAt, checked_in_by: checkedInBy, entry_status: entryStatus, notes };
+            filtered.unshift(record);
+            await this._saveSupabaseConfigAttendance(filtered);
+            return record;
+          }
+          throw error;
+        }
+        return data || { usn, student_name: name, checked_in_at: checkedInAt, checked_in_by: checkedInBy, entry_status: entryStatus, notes };
+      } catch (err) {
+        if (err.code === 'PGRST205' || (err.message && err.message.includes('attendance'))) {
+          const list = await this._getSupabaseConfigAttendance();
+          const filtered = list.filter(a => a.usn !== usn);
+          const record = { usn, student_name: name, checked_in_at: checkedInAt, checked_in_by: checkedInBy, entry_status: entryStatus, notes };
+          filtered.unshift(record);
+          await this._saveSupabaseConfigAttendance(filtered);
+          return record;
+        }
+        throw err;
+      }
+    }
+    if (isPostgres) {
+      const res = await pgPool.query(`
+        INSERT INTO attendance (usn, student_name, checked_in_at, checked_in_by, entry_status, notes)
+        VALUES ($1, $2, $3, $4, $5, $6)
+        ON CONFLICT (usn) DO UPDATE SET
+          student_name = EXCLUDED.student_name,
+          checked_in_by = EXCLUDED.checked_in_by,
+          entry_status = EXCLUDED.entry_status,
+          notes = EXCLUDED.notes
+        RETURNING *
+      `, [usn, name, checkedInAt, checkedInBy, entryStatus, notes]);
+      return res.rows[0];
+    }
+    sqliteStmts.addAttendance.run(usn, name, checkedInBy, entryStatus, notes);
+    return { usn, student_name: name, checked_in_at: checkedInAt, checked_in_by: checkedInBy, entry_status: entryStatus, notes };
+  },
+
+  async deleteAttendance(usn) {
+    if (supabaseClient) {
+      try {
+        const { error } = await supabaseClient
+          .from('attendance')
+          .delete()
+          .eq('usn', usn);
+        if (error) {
+          if (error.code === 'PGRST205' || (error.message && error.message.includes('attendance'))) {
+            const list = await this._getSupabaseConfigAttendance();
+            await this._saveSupabaseConfigAttendance(list.filter(a => a.usn !== usn));
+            return true;
+          }
+          throw error;
+        }
+        return true;
+      } catch (err) {
+        if (err.code === 'PGRST205' || (err.message && err.message.includes('attendance'))) {
+          const list = await this._getSupabaseConfigAttendance();
+          await this._saveSupabaseConfigAttendance(list.filter(a => a.usn !== usn));
+          return true;
+        }
+        throw err;
+      }
+    }
+    if (isPostgres) {
+      await pgPool.query('DELETE FROM attendance WHERE usn = $1', [usn]);
+      return true;
+    }
+    sqliteStmts.deleteAttendance.run(usn);
+    return true;
+  },
+
+  async getAllAttendance() {
+    if (supabaseClient) {
+      try {
+        const { data, error } = await supabaseClient
+          .from('attendance')
+          .select('*')
+          .order('checked_in_at', { ascending: false });
+        if (error) {
+          if (error.code === 'PGRST205' || (error.message && error.message.includes('attendance'))) {
+            return await this._getSupabaseConfigAttendance();
+          }
+          throw error;
+        }
+        return data || [];
+      } catch (err) {
+        if (err.code === 'PGRST205' || (err.message && err.message.includes('attendance'))) {
+          return await this._getSupabaseConfigAttendance();
+        }
+        throw err;
+      }
+    }
+    if (isPostgres) {
+      const res = await pgPool.query('SELECT * FROM attendance ORDER BY checked_in_at DESC');
+      return res.rows;
+    }
+    return sqliteStmts.allAttendance.all();
+  },
+
+  async getAttendanceCount() {
+    if (supabaseClient) {
+      try {
+        const { count, error } = await supabaseClient
+          .from('attendance')
+          .select('*', { count: 'exact', head: true });
+        if (error) {
+          if (error.code === 'PGRST205' || (error.message && error.message.includes('attendance'))) {
+            const list = await this._getSupabaseConfigAttendance();
+            return list.length;
+          }
+          throw error;
+        }
+        return count || 0;
+      } catch (err) {
+        if (err.code === 'PGRST205' || (err.message && err.message.includes('attendance'))) {
+          const list = await this._getSupabaseConfigAttendance();
+          return list.length;
+        }
+        throw err;
+      }
+    }
+    if (isPostgres) {
+      const res = await pgPool.query('SELECT COUNT(*)::int as count FROM attendance');
+      return Number(res.rows[0]?.count || 0);
+    }
+    return Number(sqliteStmts.attendanceTotal.get()?.count || 0);
+  },
+
+  // -------------------------------------------------------------------------
   // Event Config
   // -------------------------------------------------------------------------
   async getEventConfig() {
@@ -673,10 +898,11 @@ module.exports = {
   // -------------------------------------------------------------------------
   async getDashboardStats() {
     if (supabaseClient) {
-      const [studRes, songRes, rsvpRes] = await Promise.all([
+      const [studRes, songRes, rsvpRes, attendRes] = await Promise.all([
         supabaseClient.from('students').select('*', { count: 'exact', head: true }),
         supabaseClient.from('songs').select('*', { count: 'exact', head: true }),
-        supabaseClient.from('rsvps').select('status')
+        supabaseClient.from('rsvps').select('status'),
+        supabaseClient.from('attendance').select('*', { count: 'exact', head: true })
       ]);
 
       if (studRes.error) throw studRes.error;
@@ -685,6 +911,7 @@ module.exports = {
 
       const totalStudents = Number(studRes.count || 0);
       const totalSongRequests = Number(songRes.count || 0);
+      const totalAdmitted = attendRes?.error ? (await this.getAttendanceCount()) : Number(attendRes?.count || 0);
       const rsvps = rsvpRes.data || [];
       const totalResponded = rsvps.length;
 
@@ -704,12 +931,13 @@ module.exports = {
         yesCount,
         maybeCount,
         noCount,
-        totalSongRequests
+        totalSongRequests,
+        totalAdmitted
       };
     }
 
     if (isPostgres) {
-      const [rsvpRes, studentRes, songRes] = await Promise.all([
+      const [rsvpRes, studentRes, songRes, attendRes] = await Promise.all([
         pgPool.query(`
           SELECT 
             COUNT(*)::int as total,
@@ -719,12 +947,14 @@ module.exports = {
           FROM rsvps
         `),
         pgPool.query('SELECT COUNT(*)::int as count FROM students'),
-        pgPool.query('SELECT COUNT(*)::int as count FROM songs')
+        pgPool.query('SELECT COUNT(*)::int as count FROM songs'),
+        pgPool.query('SELECT COUNT(*)::int as count FROM attendance')
       ]);
 
       const rsvpStats = rsvpRes.rows[0] || {};
       const studentTotal = Number(studentRes.rows[0]?.count || 0);
       const songTotal = Number(songRes.rows[0]?.count || 0);
+      const attendTotal = Number(attendRes.rows[0]?.count || 0);
       const respondedCount = Number(rsvpStats.total || 0);
 
       return {
@@ -734,13 +964,15 @@ module.exports = {
         yesCount: Number(rsvpStats.yes_count || 0),
         maybeCount: Number(rsvpStats.maybe_count || 0),
         noCount: Number(rsvpStats.no_count || 0),
-        totalSongRequests: songTotal
+        totalSongRequests: songTotal,
+        totalAdmitted: attendTotal
       };
     }
 
     const rsvpStats = sqliteStmts.rsvpCounts.get() || {};
     const studentTotal = Number(sqliteStmts.studentTotal.get()?.count || 0);
     const songTotal = Number(sqliteStmts.songTotal.get()?.count || 0);
+    const attendTotal = Number(sqliteStmts.attendanceTotal.get()?.count || 0);
     const respondedCount = Number(rsvpStats.total || 0);
 
     return {
@@ -750,7 +982,8 @@ module.exports = {
       yesCount: Number(rsvpStats.yes_count || 0),
       maybeCount: Number(rsvpStats.maybe_count || 0),
       noCount: Number(rsvpStats.no_count || 0),
-      totalSongRequests: songTotal
+      totalSongRequests: songTotal,
+      totalAdmitted: attendTotal
     };
   }
 };

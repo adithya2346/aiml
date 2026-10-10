@@ -24,9 +24,10 @@ const htmlContent = `<!DOCTYPE html>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Press+Start+2P&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
 
-  <!-- External CDNs for celebration & pass download -->
+  <!-- External CDNs for celebration, pass download & live scannable QR generation -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/canvas-confetti/1.9.2/confetti.browser.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
   <style>
     /* ==========================================================================
@@ -1174,10 +1175,13 @@ const htmlContent = `<!DOCTYPE html>
       position: relative;
     }
 
-    .qr-box svg {
-      width: 100%;
-      height: 100%;
+    .qr-box svg,
+    .qr-box img,
+    .qr-box canvas {
+      width: 100% !important;
+      height: 100% !important;
       display: block;
+      border-radius: 4px;
     }
 
     .qr-badge {
@@ -1927,9 +1931,9 @@ const htmlContent = `<!DOCTYPE html>
                 </div>
               </div>
 
-              <!-- High-Tech Realistic Vector QR Code -->
+              <!-- High-Tech Scannable VIP Entry QR Code -->
               <div class="ticket-qr-area">
-                <div class="qr-box" title="Verified Event QR">
+                <div class="qr-box" id="ticket-qr-container" title="Verified Event QR">
                   <svg viewBox="0 0 140 140" fill="#0b071a" xmlns="http://www.w3.org/2000/svg" aria-label="Official VIP Pass QR Code">
                     <!-- Top-Left Finder Pattern -->
                     <rect x="6" y="6" width="36" height="36" rx="6" fill="#0b071a" />
@@ -2666,6 +2670,8 @@ const htmlContent = `<!DOCTYPE html>
       if (DOM.passStudentUsn) DOM.passStudentUsn.textContent = usn;
       if (DOM.passSecHash) DOM.passSecHash.textContent = \`SEC-\${usn.slice(-4) || 'VIP'}-PASS\`;
 
+      if (usn) generatePassQrCode(usn);
+
       if (existingRsvp) applyRsvpUI(existingRsvp, false);
 
       if (existingSong && DOM.songInput) {
@@ -2674,6 +2680,34 @@ const htmlContent = `<!DOCTYPE html>
         DOM.songFeedback.style.color = 'var(--c-emerald)';
         DOM.songFeedback.textContent = \`✅ Your requested track: "\${existingSong}"\`;
       }
+    }
+
+    function generatePassQrCode(usn) {
+      const container = document.getElementById('ticket-qr-container');
+      if (!container || !usn) return;
+      const origin = window.location.origin || 'https://freshers-party-2026-rytam.netlify.app';
+      const scanPayload = origin + '/admin.html?scan=' + encodeURIComponent(usn);
+      
+      function render() {
+        if (typeof QRCode !== 'undefined') {
+          container.innerHTML = '';
+          try {
+            new QRCode(container, {
+              text: scanPayload,
+              width: 100,
+              height: 100,
+              colorDark: "#0b071a",
+              colorLight: "#ffffff",
+              correctLevel: QRCode.CorrectLevel.M
+            });
+          } catch (e) {
+            console.warn("QR render fallback:", e);
+          }
+        } else {
+          setTimeout(render, 150);
+        }
+      }
+      render();
     }
 
     function showAppView() {
