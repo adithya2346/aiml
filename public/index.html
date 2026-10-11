@@ -2314,6 +2314,16 @@
       }
     ];
 
+    const DEFAULT_TIMELINE = [
+      { time: '09:30 AM', title: 'Red Carpet & Junior Welcome', desc: 'Collect your glow bands, badges, refreshments & entry swag.' },
+      { time: '10:15 AM', title: 'The Kickoff & SPECTRA Intro', desc: 'SPECTRA Association welcomes AIML freshers with icebreakers & roast session.' },
+      { time: '11:00 AM', title: 'Battle of the Batches', desc: 'Interactive multiplayer challenges, talent hunt & casual ramp walk.' },
+      { time: '12:15 PM', title: 'Live Performances & Flash Mob', desc: 'College bands & electrifying senior flash mob showcase.' },
+      { time: '01:00 PM', title: 'Feast Mode Activated', desc: 'Lavish buffet lunch, desserts, and photo booth madness.' },
+      { time: '02:00 PM', title: 'High-Voltage DJ & Dance', desc: 'Turn up the bass on the dance floor with campus resident DJs.' },
+      { time: '03:30 PM', title: 'Crowning & Sendoff', desc: 'Announcement of Mr. & Ms. Fresher 2026 followed by farewell cheers.' }
+    ];
+
     /**
      * App State
      */
@@ -2428,7 +2438,8 @@
 
       } catch (err) {
         console.error('Init error:', err);
-        // Fallback organizers and FAQs even if backend fails
+        // Fallback timeline, organizers and FAQs even if backend fails
+        populateTimeline(DEFAULT_TIMELINE);
         populateFaqs(DEFAULT_FAQS);
         populateOrganizers();
         hideLoading();
@@ -2472,9 +2483,8 @@
       if (DOM.passFooterVenue) DOM.passFooterVenue.textContent = '📍 ' + (cfg.venueShort || cfg.venueName || 'Party Hall (Room 332)');
 
       // Timeline Schedule
-      if (Array.isArray(cfg.timeline)) {
-        populateTimeline(cfg.timeline);
-      }
+      const timelineList = (Array.isArray(cfg.timeline) && cfg.timeline.length > 0) ? cfg.timeline : DEFAULT_TIMELINE;
+      populateTimeline(timelineList);
 
       // FAQs
       const faqsList = (Array.isArray(cfg.faqs) && cfg.faqs.length > 0) ? cfg.faqs : DEFAULT_FAQS;

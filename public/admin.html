@@ -298,6 +298,49 @@
       font-weight: 700;
     }
 
+    /* Event Quests / Timeline Manager */
+    .quest-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .quest-card:hover {
+      border-color: rgba(168, 85, 247, 0.45);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+    }
+    .quest-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.85rem;
+      padding-bottom: 0.6rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .quest-label {
+      display: block;
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-sec);
+      margin-bottom: 0.35rem;
+      font-weight: 700;
+    }
+    .quest-grid-row {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 0.85rem;
+      margin-bottom: 0.85rem;
+    }
+    @media (max-width: 600px) {
+      .quest-grid-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
     @media (max-width: 600px) {
       .stats-grid { grid-template-columns: repeat(2, 1fr); }
     }
@@ -356,6 +399,7 @@
         <button class="tab-btn" data-tab="songs">🎵 Song Requests</button>
         <button class="tab-btn" data-tab="students">👥 Student Registry</button>
         <button class="tab-btn" data-tab="manage">⚙️ Manage Students</button>
+        <button class="tab-btn" data-tab="quests">⏳ Event Quests (Timeline)</button>
         <button class="tab-btn" data-tab="faqs">❓ Relevant Questions (FAQs)</button>
       </div>
 
@@ -486,6 +530,31 @@
             <button class="btn btn-primary btn-sm" id="bulk-upload-btn">Upload All</button>
             <span id="bulk-feedback" style="font-size: 0.82rem; display: none;"></span>
           </div>
+        </div>
+      </div>
+
+      <!-- Event Quests (Timeline) Tab Panel -->
+      <div class="tab-panel" id="tab-quests">
+        <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 1.25rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.8rem;">
+          <div>
+            <h3 style="font-size: 1.15rem; margin-bottom: 0.25rem;">⏳ Event Quests &amp; Timeline Manager</h3>
+            <p style="font-size: 0.83rem; color: var(--text-sec);">
+              Edit, add, reorder, or delete quest events and timeline schedule displayed to students on the invitation page.
+            </p>
+          </div>
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <button type="button" class="btn btn-outline btn-sm" id="quest-add-btn">➕ Add Quest</button>
+            <button type="button" class="btn btn-primary btn-sm" id="quest-save-btn">💾 Save All Changes</button>
+            <button type="button" class="btn btn-danger btn-sm" id="quest-reset-btn" title="Reload from database">🔄 Reset</button>
+          </div>
+        </div>
+
+        <div id="quest-banner" style="display: none; padding: 0.75rem 1rem; border-radius: 10px; margin-bottom: 1rem; font-size: 0.88rem;"></div>
+
+        <div id="quest-list-container" style="display: flex; flex-direction: column; gap: 1rem;"></div>
+
+        <div class="empty-state" id="quest-empty" style="display: none;">
+          No quest items found. Click "➕ Add Quest" above to create one.
         </div>
       </div>
 
@@ -717,6 +786,7 @@
 
         $('last-updated').textContent = `Last refreshed: ${new Date().toLocaleTimeString()}`;
         loadFaqsData();
+        loadQuestsData();
 
       } catch (err) {
         console.error('Dashboard load error:', err);
@@ -736,6 +806,8 @@
         if (panel) panel.classList.add('active');
         if (tabName === 'faqs') {
           loadFaqsData();
+        } else if (tabName === 'quests') {
+          loadQuestsData();
         } else if (tabName !== 'attendance' && isScannerRunning) {
           stopCameraScanner();
         }
@@ -1099,6 +1171,230 @@
       $('admin-dashboard').style.display = 'none';
       $('admin-login').style.display = 'flex';
       $('admin-password').value = '';
+    });
+
+    // =========================================================================
+    // EVENT QUESTS / TIMELINE MANAGER
+    // =========================================================================
+    let questsState = [];
+
+    async function loadQuestsData() {
+      try {
+        const res = await ADMIN_API.get('/api/admin/quests');
+        if (!res) return;
+        questsState = Array.isArray(res.quests || res.timeline) ? (res.quests || res.timeline) : [];
+        renderQuestsEditor();
+      } catch (err) {
+        console.error('Failed to load Quests:', err);
+        showToast('Failed to load quests from database', 'error');
+      }
+    }
+
+    function syncQuestsFromDOM() {
+      const container = $('quest-list-container');
+      if (!container) return;
+      const cards = container.querySelectorAll('.quest-card');
+      const updated = [];
+      cards.forEach(card => {
+        const timeInput = card.querySelector('.quest-input-time');
+        const titleInput = card.querySelector('.quest-input-title');
+        const descInput = card.querySelector('.quest-input-desc');
+        if (timeInput && titleInput && descInput) {
+          updated.push({
+            time: timeInput.value.trim(),
+            title: titleInput.value.trim(),
+            desc: descInput.value.trim()
+          });
+        }
+      });
+      if (updated.length > 0 || cards.length > 0) {
+        questsState = updated;
+      }
+    }
+
+    function renderQuestsEditor() {
+      const container = $('quest-list-container');
+      const emptyState = $('quest-empty');
+      if (!container) return;
+      container.innerHTML = '';
+
+      if (!questsState || questsState.length === 0) {
+        if (emptyState) emptyState.style.display = 'block';
+        return;
+      }
+
+      if (emptyState) emptyState.style.display = 'none';
+
+      questsState.forEach((item, index) => {
+        const card = document.createElement('div');
+        card.className = 'quest-card';
+        card.dataset.index = index;
+
+        const isFirst = index === 0;
+        const isLast = index === questsState.length - 1;
+
+        card.innerHTML = `
+          <div class="quest-card-header">
+            <div style="display: flex; align-items: center; gap: 0.6rem;">
+              <span class="badge" style="background: rgba(168, 85, 247, 0.2); color: var(--purple); font-weight: 700;">Quest #${index + 1}</span>
+              <span class="quest-time-badge" style="font-size: 0.82rem; color: var(--cyan); font-weight: 600;">⏰ ${esc(item.time || 'Time TBD')}</span>
+            </div>
+            <div style="display: flex; gap: 0.35rem;">
+              <button type="button" class="btn btn-outline btn-sm quest-btn-up" data-index="${index}" title="Move Up" ${isFirst ? 'disabled' : ''}>⬆️</button>
+              <button type="button" class="btn btn-outline btn-sm quest-btn-down" data-index="${index}" title="Move Down" ${isLast ? 'disabled' : ''}>⬇️</button>
+              <button type="button" class="btn btn-danger btn-sm quest-btn-delete" data-index="${index}" title="Delete Quest">🗑️ Delete</button>
+            </div>
+          </div>
+
+          <div class="quest-grid-row">
+            <div>
+              <label class="quest-label">Time / Schedule:</label>
+              <input type="text" class="quest-input-time" data-index="${index}" value="${esc(item.time)}" placeholder="e.g. 10:15 AM or 10:15 - 11:00 AM" required>
+            </div>
+            <div>
+              <label class="quest-label">Quest Title / Event Name:</label>
+              <input type="text" class="quest-input-title" data-index="${index}" value="${esc(item.title)}" placeholder="e.g. Battle of the Batches" required>
+            </div>
+          </div>
+
+          <div class="quest-field">
+            <label class="quest-label">Description / Quest Briefing:</label>
+            <textarea class="quest-input-desc" data-index="${index}" rows="2" placeholder="e.g. Interactive multiplayer challenges, talent hunt & casual ramp walk..." required>${esc(item.desc)}</textarea>
+          </div>
+        `;
+
+        // Live typing synchronization
+        const timeInput = card.querySelector('.quest-input-time');
+        const titleInput = card.querySelector('.quest-input-title');
+        const descInput = card.querySelector('.quest-input-desc');
+        const timeBadge = card.querySelector('.quest-time-badge');
+
+        timeInput.addEventListener('input', (e) => {
+          questsState[index].time = e.target.value;
+          if (timeBadge) timeBadge.textContent = '⏰ ' + (e.target.value.trim() || 'Time TBD');
+        });
+        titleInput.addEventListener('input', (e) => {
+          questsState[index].title = e.target.value;
+        });
+        descInput.addEventListener('input', (e) => {
+          questsState[index].desc = e.target.value;
+        });
+
+        // Move up
+        card.querySelector('.quest-btn-up').addEventListener('click', () => {
+          if (index > 0) {
+            syncQuestsFromDOM();
+            const temp = questsState[index];
+            questsState[index] = questsState[index - 1];
+            questsState[index - 1] = temp;
+            renderQuestsEditor();
+          }
+        });
+
+        // Move down
+        card.querySelector('.quest-btn-down').addEventListener('click', () => {
+          if (index < questsState.length - 1) {
+            syncQuestsFromDOM();
+            const temp = questsState[index];
+            questsState[index] = questsState[index + 1];
+            questsState[index + 1] = temp;
+            renderQuestsEditor();
+          }
+        });
+
+        // Delete
+        card.querySelector('.quest-btn-delete').addEventListener('click', () => {
+          syncQuestsFromDOM();
+          const qTitle = questsState[index].title ? `"${questsState[index].title.slice(0, 30)}..."` : `Quest #${index + 1}`;
+          if (confirm(`Are you sure you want to delete ${qTitle}?`)) {
+            questsState.splice(index, 1);
+            renderQuestsEditor();
+            showToast('Quest removed. Click "Save All Changes" to persist.', 'success');
+          }
+        });
+
+        container.appendChild(card);
+      });
+    }
+
+    // Add New Quest
+    $('quest-add-btn').addEventListener('click', () => {
+      syncQuestsFromDOM();
+      questsState.push({ time: '', title: '', desc: '' });
+      renderQuestsEditor();
+      showToast('New quest card added at bottom', 'success');
+      const cards = $('quest-list-container').querySelectorAll('.quest-card');
+      const lastCard = cards[cards.length - 1];
+      if (lastCard) {
+        lastCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        const input = lastCard.querySelector('.quest-input-time');
+        if (input) input.focus();
+      }
+    });
+
+    // Save All Quest Changes
+    $('quest-save-btn').addEventListener('click', async () => {
+      syncQuestsFromDOM();
+
+      const cleaned = questsState
+        .map(q => ({
+          time: q.time.trim(),
+          title: q.title.trim(),
+          desc: q.desc.trim()
+        }))
+        .filter(q => q.time.length > 0 || q.title.length > 0 || q.desc.length > 0);
+
+      if (cleaned.length === 0) {
+        showToast('Please add at least one quest item before saving', 'error');
+        return;
+      }
+
+      const saveBtn = $('quest-save-btn');
+      const origText = saveBtn.textContent;
+      saveBtn.disabled = true;
+      saveBtn.textContent = '💾 Saving to Database...';
+
+      const banner = $('quest-banner');
+      if (banner) banner.style.display = 'none';
+
+      try {
+        const { status, data } = await ADMIN_API.put('/api/admin/quests', { timeline: cleaned });
+        if (status === 200 && data.success) {
+          showToast(`✅ Saved ${data.count} quest timeline events successfully!`, 'success');
+          if (banner) {
+            banner.style.display = 'block';
+            banner.style.background = 'rgba(16, 185, 129, 0.2)';
+            banner.style.border = '1px solid rgba(16, 185, 129, 0.4)';
+            banner.style.color = '#34d399';
+            banner.textContent = `✅ Successfully saved ${data.count} event quests in the database! Changes are immediately live on the student invitation page.`;
+            setTimeout(() => { banner.style.display = 'none'; }, 6000);
+          }
+          await loadQuestsData();
+        } else {
+          showToast(`❌ ${data.error || 'Failed to save quests'}`, 'error');
+          if (banner) {
+            banner.style.display = 'block';
+            banner.style.background = 'rgba(239, 68, 68, 0.2)';
+            banner.style.border = '1px solid rgba(239, 68, 68, 0.4)';
+            banner.style.color = '#f87171';
+            banner.textContent = `❌ ${data.error || 'Failed to save quests'}`;
+          }
+        }
+      } catch (err) {
+        console.error('Save Quests error:', err);
+        showToast('Network error while saving quests', 'error');
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = origText;
+      }
+    });
+
+    // Reset Quests to DB version
+    $('quest-reset-btn').addEventListener('click', async () => {
+      if (confirm('Discard unsaved edits and reload quests from the database?')) {
+        await loadQuestsData();
+        showToast('Quests reloaded from database', 'success');
+      }
     });
 
     // =========================================================================

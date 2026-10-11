@@ -221,6 +221,16 @@ app.post('/api/song', requireAuth, async (req, res, next) => {
   }
 });
 
+const DEFAULT_TIMELINE = [
+  { time: '09:30 AM', title: 'Red Carpet & Junior Welcome', desc: 'Collect your glow bands, badges, refreshments & entry swag.' },
+  { time: '10:15 AM', title: 'The Kickoff & SPECTRA Intro', desc: 'SPECTRA Association welcomes AIML freshers with icebreakers & roast session.' },
+  { time: '11:00 AM', title: 'Battle of the Batches', desc: 'Interactive multiplayer challenges, talent hunt & casual ramp walk.' },
+  { time: '12:15 PM', title: 'Live Performances & Flash Mob', desc: 'College bands & electrifying senior flash mob showcase.' },
+  { time: '01:00 PM', title: 'Feast Mode Activated', desc: 'Lavish buffet lunch, desserts, and photo booth madness.' },
+  { time: '02:00 PM', title: 'High-Voltage DJ & Dance', desc: 'Turn up the bass on the dance floor with campus resident DJs.' },
+  { time: '03:30 PM', title: 'Crowning & Sendoff', desc: 'Announcement of Mr. & Ms. Fresher 2026 followed by farewell cheers.' }
+];
+
 /**
  * GET /api/event
  * Returns public event configuration (no auth needed).
@@ -228,6 +238,9 @@ app.post('/api/song', requireAuth, async (req, res, next) => {
 app.get('/api/event', async (req, res, next) => {
   try {
     const config = await db.getEventConfig();
+    if (!config.timeline || !Array.isArray(config.timeline) || config.timeline.length === 0) {
+      config.timeline = DEFAULT_TIMELINE;
+    }
     res.json(config);
   } catch (err) {
     next(err);
@@ -452,6 +465,55 @@ app.put('/api/admin/faqs', requireAdmin, async (req, res, next) => {
     next(err);
   }
 });
+
+/**
+ * GET /api/admin/timeline and /api/admin/quests
+ * Returns current event quests / timeline from database for admin management.
+ */
+async function handleGetTimeline(req, res, next) {
+  try {
+    const config = await db.getEventConfig();
+    const timeline = (Array.isArray(config.timeline) && config.timeline.length > 0) ? config.timeline : DEFAULT_TIMELINE;
+    res.json({ success: true, timeline, quests: timeline });
+  } catch (err) {
+    next(err);
+  }
+}
+app.get('/api/admin/timeline', requireAdmin, handleGetTimeline);
+app.get('/api/admin/quests', requireAdmin, handleGetTimeline);
+
+/**
+ * PUT /api/admin/timeline and /api/admin/quests
+ * Body: { timeline: [ { time: '09:30 AM', title: '...', desc: '...' }, ... ] }
+ * Save and alter event quests / timeline in event_config.
+ */
+async function handlePutTimeline(req, res, next) {
+  try {
+    const rawItems = req.body.timeline || req.body.quests;
+    if (!Array.isArray(rawItems)) {
+      return res.status(400).json({ error: 'Quests/timeline must be an array of quest items' });
+    }
+
+    const cleaned = rawItems
+      .map(item => ({
+        time: String(item.time || '').trim(),
+        title: String(item.title || '').trim(),
+        desc: String(item.desc || '').trim()
+      }))
+      .filter(item => item.time.length > 0 || item.title.length > 0 || item.desc.length > 0);
+
+    if (cleaned.length === 0) {
+      return res.status(400).json({ error: 'Please provide at least one valid quest timeline item' });
+    }
+
+    await db.updateEventConfig('timeline', cleaned);
+    res.json({ success: true, count: cleaned.length, timeline: cleaned, quests: cleaned });
+  } catch (err) {
+    next(err);
+  }
+}
+app.put('/api/admin/timeline', requireAdmin, handlePutTimeline);
+app.put('/api/admin/quests', requireAdmin, handlePutTimeline);
 
 // ===========================================================================
 // ATTENDANCE & QR GATE SCANNER API
